@@ -8,5 +8,6 @@ setup(name='arxiv_library',
       author_email='{lukas.pfahler, jonathan.schill, jan-philip.richter}@tu-dortmund.de',
       license='MIT',
       packages=['arxiv_library'],
+      install_requires=['arxiv'],
       zip_safe=False
 )

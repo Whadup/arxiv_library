@@ -4,7 +4,6 @@ import subprocess
 import json
 import logging
 import re
-import config as c
 
 annotation_re = re.compile(r'<annotation.*</annotation>', re.DOTALL)
 
