@@ -31,7 +31,7 @@ def main():
     parser.add_argument("--partition", type=int, default=1)
     parser.add_argument("--total_partitions", type=int, default=1)
     args = parser.parse_args()
-    
+
     log_file = "mathml-extraction{}-{}.log".format(args.partition, args.total_partitions)
     logging.basicConfig(filename=log_file, level=logging.WARNING, format='%(levelname)s at %(asctime)s: %(message)s')
     install_mp_handler()

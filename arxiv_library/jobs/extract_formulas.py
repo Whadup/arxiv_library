@@ -68,7 +68,7 @@ def extract_from_arxiv_dir(arxiv_dir, overwrite=False, test_indir=None, test_out
             }
 
             eqs = list(env_parser.extract_envs(section_content))
-            for eq in eqs: 
+            for eq in eqs:
                 # rm newlines and carriage returns
                 eq = eq.replace('\n', ' ').replace('\r', '')
 

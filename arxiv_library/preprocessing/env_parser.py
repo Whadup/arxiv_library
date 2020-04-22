@@ -14,7 +14,7 @@ BEGIN_ENVS_IDS = ["equation", "displaymath", "array", "eqnarray", "multline", "g
 TABULAR_ALIGNING_RE = r"\{[l,c,r,\|,\s]*?\}"
 # construct REs for all possible env beginnings
 for env_id in BEGIN_ENVS_IDS:
-    env_begin_re = re.compile(ENV_BEGIN_TEMPLATE.format("{" + env_id + "}")) 
+    env_begin_re = re.compile(ENV_BEGIN_TEMPLATE.format("{" + env_id + "}"))
     env_begin_re_star = re.compile(ENV_BEGIN_TEMPLATE.format("{" + env_id + r"\*}"))
     BEGIN_ENVS.append(env_begin_re)
     BEGIN_ENVS.append(env_begin_re_star)
@@ -52,7 +52,7 @@ def extract_envs(tex_string):
                 current_env_identifier = ""
 
                 line = cut_after_env_end(line, match)
-                current_env = current_env.lstrip().rstrip() 
+                current_env = current_env.lstrip().rstrip()
                 yield current_env
             # if the env is not ended yet, append the current line to the current_env
             else:
@@ -66,19 +66,19 @@ def extract_envs(tex_string):
                 line = cut_before_env_begin(line, match)
 
                 env_begin = match.group()
-                current_env = line.replace(env_begin, "") 
+                current_env = line.replace(env_begin, "")
                 current_env = re.sub(TABULAR_ALIGNING_RE, "", current_env)
                 current_env_identifier = get_identifier(line)
 
                 # this env could be closed in the same line (So, we check for that)
-                match_end = scan_for_env_end(line, current_env_identifier) 
+                match_end = scan_for_env_end(line, current_env_identifier)
                 if match_end:
                     is_in_math_env = False
                     current_env_identifier = ""
 
                     env_end = match_end.group()
                     current_env = current_env.replace(env_end, "")
-                    current_env = current_env.lstrip().rstrip() 
+                    current_env = current_env.lstrip().rstrip()
                     yield current_env
 
 
@@ -89,7 +89,7 @@ def scan_for_env_end(line, current_env_identifier):
     elif current_env_identifier == r"\]":
         env_end_re = r"\\\]"
     else:
-        env_end_re = ENV_END_TEMPLATE.format("{" + current_env_identifier + "}") 
+        env_end_re = ENV_END_TEMPLATE.format("{" + current_env_identifier + "}")
     # return the match object (will be None if there is no match)
     match = re.search(env_end_re, line)
     return match
@@ -100,21 +100,22 @@ def scan_for_env_begin(line):
         match = env_begin_re.search(line)
         if match:
             return match
+    return None
 
 
 def cut_after_env_end(line, match):
     cutted_line = line[:match.end()]
-    return cutted_line 
+    return cutted_line
 
 
 def cut_before_env_begin(line, match):
     cutted_line = line[match.start():]
-    return cutted_line 
+    return cutted_line
 
 
 def get_identifier(line):
-    """ 
-    This function is called with a string as an argument that contains the beginning of 
+    """
+    This function is called with a string as an argument that contains the beginning of
     a math-environment. It returns the identifier of this env.
     """
     match = identifier_re.search(line)
