@@ -7,7 +7,7 @@ import os
 from os import path
 
 import config as c
-import utils.utils as h
+import arxiv_library.utils.utils as h
 
 SUBIMPORT_RE = re.compile(r"\\subimport\*?(\{.*?\})(\{.*?\})")
 IMPORT_RE = re.compile(r"\\import\*?(\{.*\})(\{.*?\})")

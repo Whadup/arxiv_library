@@ -12,7 +12,7 @@ import arxiv_library.utils.utils as h
 from arxiv_library.utils.tempfs import write_tmpfs_to_disk, check_tempfs_status
 from arxiv_library.utils.multiprocessing_logging import install_mp_handler
 
-import config as c
+import arxiv_library.jobs.config as c
 
 
 def extract_gzs(tar_archive):

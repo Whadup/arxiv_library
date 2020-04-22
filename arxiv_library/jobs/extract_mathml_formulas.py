@@ -9,13 +9,10 @@ import traceback
 from multiprocessing import Pool
 from tqdm import tqdm
 
-import arxiv_lib.mathml_compile as mathml_compile
-import arxiv_lib.preprocessing as preprocessing
-import arxiv_lib.formula_parser as formula_parser
-from arxiv_lib.multiprocessing_logging import install_mp_handler
-from arxiv_lib.tempfs import check_tempfs_status, write_tmpfs_to_disk
-import arxiv_lib.helpers as h
-import config as c
+import arxiv_library.compilation.mathml_compile as mathml_compile
+from arxiv_library.utils.multiprocessing_logging import install_mp_handler
+import arxiv_library.utils.utils as h
+import arxiv_library.jobs.config as c
 
 
 def extract_from_equation_file(formula_file):

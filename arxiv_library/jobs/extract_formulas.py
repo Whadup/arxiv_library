@@ -4,13 +4,13 @@ import json
 import argparse
 import logging
 import traceback
-
-from arxiv_lib.multiprocessing_logging import install_mp_handler
 from multiprocessing import Pool
-import arxiv_lib.preprocessing as preprocessing
-import arxiv_lib.helpers as h
-import config as c
-from arxiv_lib import env_parser
+
+import arxiv_library.preprocessing.preprocessing as preprocessing
+import arxiv_library.jobs.config as c
+import arxiv_library.preprocessing.env_parser as env_parser
+import arxiv_library.utils.utils as h
+from arxiv_library.utils.multiprocessing_logging import install_mp_handler
 
 
 
@@ -110,8 +110,8 @@ def main():
     full_workload = os.listdir(c.TEX_LOCATION)
     workload = full_workload[args.partition-1::args.total_partitions]
     with Pool(c.NUM_WORKERS) as pool:
-            results = pool.imap(extract_from_arxiv_dir, workload)
-            results = list(results)
+        results = pool.imap(extract_from_arxiv_dir, workload)
+        results = list(results)
 
 if __name__ == '__main__':
     main()
