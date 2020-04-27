@@ -1,5 +1,5 @@
 
-def rm_comms(tex_string):
+def rm_comments(tex_string):
     """ Remove all commented statements from tex_string."""
     lines = tex_string.split("\n")
     resulting_lines = ""

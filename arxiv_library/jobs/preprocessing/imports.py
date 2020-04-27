@@ -4,7 +4,13 @@ import os
 import re
 
 
-def find_main(root):
+def resolve_imports(root):
+    main_file = _find_main_file(root)
+    tex_string = _resolve_imports(main_file, root)
+    return tex_string
+
+
+def _find_main_file(root):
     """ Find main tex-file in dir and return its path """
 
     for file_path in os.listdir(root):
@@ -23,7 +29,7 @@ def find_main(root):
     return None
 
 
-def resolve(file_name, root_dir, depth=3):
+def _resolve_imports(file_name, root_dir, depth=3):
     """Resolve all imports in a given latex file.
     :param file_name: A string denoting the name of the file that should be resolved.
     :param root_dir: A string denoting the absolute directory root, in which the file of the paper is located.
@@ -37,10 +43,10 @@ def resolve(file_name, root_dir, depth=3):
         logging.warning("File not found: " + file_path); return
 
     regexs = [
-        (re.compile(r"\\input(\{.*?\})"), False),  # (regex, filepath is relative)
-        (re.compile(r"\\include(\{.*?\})"), False),
-        (re.compile(r"\\subimport\*?(\{.*?\})(\{.*?\})"), True),
-        (re.compile(r"\\import\*?(\{.*\})(\{.*?\})"), True)
+        (re.compile(r"\\input(\{.*?\})"), True),  # (regex, filepath is relative)
+        (re.compile(r"\\include(\{.*?\})"), True),
+        (re.compile(r"\\subimport\*?(\{.*?\})(\{.*?\})"), False),
+        (re.compile(r"\\import\*?(\{.*\})(\{.*?\})"), False)
     ]
 
     with open(file_path) as tex_file:
@@ -67,18 +73,18 @@ def resolve(file_name, root_dir, depth=3):
                 path = os.path.join(dir, name)
 
                 if '.tikz' in name:
-                    tex_string = tex_string.replace(match.group(), ""); continue
+                    tex_string = tex_string.replace(match.group(), ''); continue
 
                 corrected_path = utils.assure_valid_extension(path)
                 corrected_name = os.path.basename(corrected_path)
                 corrected_dir = os.path.dirname(corrected_path)
 
-                matched_file_tex = resolve(corrected_name, corrected_dir, depth - 1)
+                matched_file_tex = _resolve_imports(corrected_name, corrected_dir, depth - 1)
                 tex_string = tex_string.replace(match.group(), matched_file_tex)
 
     bbl_path = os.path.join(root_dir, file_name).replace('.tex', '.bbl')
 
     if os.path.exists(bbl_path):
-        tex_string += resolve(bbl_path, root_dir, depth - 1)
+        tex_string += _resolve_imports(bbl_path, root_dir, depth - 1)
 
     return tex_string
