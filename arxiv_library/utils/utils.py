@@ -55,6 +55,8 @@ def assure_valid_extension(file_path):
         return file_path
     if not file_ext:
         return file_path + TEX_ENDING
+    if os.path.exists(file_path + TEX_ENDING):
+        return file_path + TEX_ENDING
     logging.warning("Unkown file ending: %s in path: %s", file_ext, file_path)
     return file_path
 
