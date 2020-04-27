@@ -6,7 +6,6 @@ import logging
 import os
 from os import path
 
-import config as c
 import arxiv_library.utils.utils as h
 
 SUBIMPORT_RE = re.compile(r"\\subimport\*?(\{.*?\})(\{.*?\})")
@@ -72,6 +71,7 @@ def extract_gz(gzip, name, target=None):
     :param source: a string denoting the path to the tar
     :return: 1 if succesfull, 0 if not.
     """
+    import config as c
     arxiv_id = os.path.basename(name).replace(".gz", "")
     if target is None:
         target = os.path.join(c.TEX_LOCATION, arxiv_id)
@@ -304,8 +304,7 @@ def resolve(file_name, root_dir, curr_dir, maxdepth=3):
 ##########################
 # Functions for sectionizing
 ##########################
-
-
+FORBIDDEN_SEC_CHARS = ['/', '{', '}', '$', '^', '\\', "\'", "`", "\""]
 def sectionize(tex_string):
     """Splits a given tex-string in its sections.
     Requires a string without commented statements.
@@ -333,7 +332,7 @@ def sectionize(tex_string):
 
         sec_id = current_sec.groups()[0]
 
-        for forbidden_char in c.FORBIDDEN_SEC_CHARS:
+        for forbidden_char in FORBIDDEN_SEC_CHARS:
             sec_id = sec_id.replace(forbidden_char, "")
 
         sections[sec_id] = sec_content
