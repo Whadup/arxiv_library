@@ -25,4 +25,4 @@ def extract_preamble(tex_string):
             brace_count += len([x for x in _latex_braces_l.findall(line) if len(x) == 1])
             brace_count -= len([x for x in _latex_braces_r.findall(line) if len(x) == 1])
 
-    return {'preamble': macros}
+    return {'preamble': macros, 'paper': tex_string.split('\\begin{document}')[1]}
