@@ -4,6 +4,14 @@ import os
 import re
 
 
+_regexs = [
+    (re.compile(r"\\input(\{.*?\})"), False),  # (regex, filepath has path prefix as argument)
+    (re.compile(r"\\include(\{.*?\})"), False),
+    (re.compile(r"\\subimport\*?(\{.*?\})(\{.*?\})"), True),
+    (re.compile(r"\\import\*?(\{.*\})(\{.*?\})"), True)
+]
+
+
 def resolve_imports(file_dict):
     for path, text in file_dict.items(): 
         if path.endswith('.tex'):
@@ -14,19 +22,12 @@ def resolve_imports(file_dict):
 
 
 def _resolve_imports(path, file_dict, depth=3):
-    regexs = [
-        (re.compile(r"\\input(\{.*?\})"), False),  # (regex, filepath has path prefix as argument)
-        (re.compile(r"\\include(\{.*?\})"), False),
-        (re.compile(r"\\subimport\*?(\{.*?\})(\{.*?\})"), True),
-        (re.compile(r"\\import\*?(\{.*\})(\{.*?\})"), True)
-    ]
-
     tex_string = file_dict[path]
 
     if depth == 0:
         return tex_string
 
-    for regex, has_path_prefix in regexs:
+    for regex, has_path_prefix in _regexs:
         for match in regex.finditer(file_dict[path]):
             matched_path = match.groups()[0].strip("{}")
 
