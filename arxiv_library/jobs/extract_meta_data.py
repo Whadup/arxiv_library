@@ -7,8 +7,8 @@ from tqdm import tqdm
 import re
 import logging
 
-import config as c
-import arxiv_lib.helpers as h
+import arxiv_library.jobs.config as c
+import arxiv_library.utils.utils as h
 
 # Get the meta_dat for CHUNK_SIZE papers at once
 CHUNK_SIZE = 100
