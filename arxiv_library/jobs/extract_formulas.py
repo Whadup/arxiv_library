@@ -86,7 +86,7 @@ def extract_from_arxiv_dir(arxiv_dir, overwrite=False, test_indir=None, test_out
         if formula_counter > 0:
             paper_dict = {
                 'preamble': preamble,
-                'equations': formulas
+                'sections': formulas
             }
             with open(output_file_path, "w") as f:
                 json.dump(paper_dict, f, indent=4, sort_keys=True)
