@@ -54,3 +54,7 @@ META_DATA_POSTFIX = "meta_data"
 
 # Size of data chunk that is moved from tmpfs to persistent disk.
 CHUNK_SIZE = 4 * 1024**3 # 4G
+
+import os
+JSON_LOCATION = os.getenv("JSON_LOCATION", JSON_LOCATION)
+TEX_LOCATION = os.getenv("TEX_LOCATION", TEX_LOCATION)
