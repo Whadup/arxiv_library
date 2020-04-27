@@ -3,7 +3,6 @@ Some helper functions for convenience
 """
 import logging
 import os
-import config as c
 
 TEX_ENDING = ".tex"
 
@@ -30,6 +29,7 @@ def indices(soup, query):
 def read_tar_file(raw, root):
     """ Tries to open the tar (or gz?) file given by raw"""
 
+    import config as c
     for encoding in c.ENCODINGS:
         try:
             file_string = raw.decode(encoding)
