@@ -5,13 +5,7 @@ import re
 
 
 def resolve_imports(root):
-    main_file = _find_main_file(root)
-    tex_string = _resolve_imports(main_file, root)
-    return tex_string
-
-
-def _find_main_file(root):
-    """ Find main tex-file in dir and return its path """
+    main_file_path = None
 
     for file_path in os.listdir(root):
         if file_path.endswith('.tex'):
@@ -24,9 +18,9 @@ def _find_main_file(root):
                     return None
 
                 if '\\begin{document}' in file_string:
-                    return os.path.basename(file_path)
+                    main_file_path = os.path.basename(file_path)
 
-    return None
+    return _resolve_imports(main_file_path, root)
 
 
 def _resolve_imports(file_name, root_dir, depth=3):
