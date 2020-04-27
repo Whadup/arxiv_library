@@ -4,81 +4,42 @@ import os
 import re
 
 
-def resolve_imports(root):
-    main_file_path = None
+def resolve_imports(file_dict):
+    for path, text in file_dict.items(): 
+        if path.endswith('.tex'):
+            if '\\begin{document}' in text:
+                return _resolve_imports(path, file_dict)
 
-    for file_path in os.listdir(root):
-        if file_path.endswith('.tex'):
-            file_path = os.path.join(root, file_path)
-
-            with open(file_path) as f:
-                file_string = f.read()
-
-                if file_string is None:
-                    return None
-
-                if '\\begin{document}' in file_string:
-                    main_file_path = os.path.basename(file_path)
-
-    return _resolve_imports(main_file_path, root)
+    raise ValueError('Did not find file with \\begin{{document}} in file dict.')
 
 
-def _resolve_imports(file_name, root_dir, depth=3):
-    """Resolve all imports in a given latex file.
-    :param file_name: A string denoting the name of the file that should be resolved.
-    :param root_dir: A string denoting the absolute directory root, in which the file of the paper is located.
-    :param depth: The max depth searched in the folder structure.
-    :returns: A string with all importing latex commands recursively resolved.
-    """
-
-    file_path = os.path.join(root_dir, file_name)
-
-    if not os.path.exists(file_path):
-        logging.warning("File not found: " + file_path); return
-
+def _resolve_imports(path, file_dict, depth=3):
     regexs = [
-        (re.compile(r"\\input(\{.*?\})"), True),  # (regex, filepath is relative)
-        (re.compile(r"\\include(\{.*?\})"), True),
-        (re.compile(r"\\subimport\*?(\{.*?\})(\{.*?\})"), False),
-        (re.compile(r"\\import\*?(\{.*\})(\{.*?\})"), False)
+        (re.compile(r"\\input(\{.*?\})"), False),  # (regex, filepath has path prefix as argument)
+        (re.compile(r"\\include(\{.*?\})"), False),
+        (re.compile(r"\\subimport\*?(\{.*?\})(\{.*?\})"), True),
+        (re.compile(r"\\import\*?(\{.*\})(\{.*?\})"), True)
     ]
 
-    with open(file_path) as tex_file:
-        tex_string = tex_file.read()
+    tex_string = file_dict[path]
 
-        if tex_string is None:
-            return
+    if depth == 0:
+        return tex_string
 
-        if depth == 0:
-            return tex_string
+    for regex, has_path_prefix in regexs:
+        for match in regex.finditer(file_dict[path]):
+            matched_path = match.groups()[0].strip("{}")
 
-        for regex, matched_path_is_relative in regexs:
-            for match in regex.finditer(tex_string):
-                if matched_path_is_relative:
-                    dir = root_dir
-                    name = match.groups()[0]
+            if has_path_prefix:
+                matched_path = os.path.join(matched_path, match.groups()[1].strip("{}"))
 
-                else:
-                    dir = match.groups()[0]
-                    name = match.groups()[1]
+            if '.tikz' in matched_path:
+                tex_string = tex_string.replace(match.group(), ''); continue
 
-                dir = dir.strip("{}")
-                name = name.strip("{}")
-                path = os.path.join(dir, name)
+            matched_file_tex_string = _resolve_imports(matched_path, file_dict, depth - 1)
+            tex_string = tex_string.replace(match.group(), matched_file_tex_string)
 
-                if '.tikz' in name:
-                    tex_string = tex_string.replace(match.group(), ''); continue
-
-                corrected_path = utils.assure_valid_extension(path)
-                corrected_name = os.path.basename(corrected_path)
-                corrected_dir = os.path.dirname(corrected_path)
-
-                matched_file_tex = _resolve_imports(corrected_name, corrected_dir, depth - 1)
-                tex_string = tex_string.replace(match.group(), matched_file_tex)
-
-    bbl_path = os.path.join(root_dir, file_name).replace('.tex', '.bbl')
-
-    if os.path.exists(bbl_path):
-        tex_string += _resolve_imports(bbl_path, root_dir, depth - 1)
+    if path.replace('.tex', '.bbl') in file_dict.keys():
+        tex_string += _resolve_imports(path.replace('.tex', '.bbl'), file_dict, depth - 1)
 
     return tex_string

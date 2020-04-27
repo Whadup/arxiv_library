@@ -1,26 +1,27 @@
 
-def remove_comments(tex_string):
+def remove_comments(file_dict):
     """ Remove all commented statements from tex_string."""
 
-    lines = tex_string.split("\n")
-    result = ''
+    for path, text in file_dict.items():
+        text = text.split("\n")
+        result = ''
 
-    for line in lines:
-        escaped = False
-        resulting_line = ''
+        for line in text:
+            escaped = False
+            resulting_line = ''
 
-        for char in line:
-            if escaped:
-                escaped = False
-                resulting_line += char
-            elif char == '\\':
-                escaped = True
-                resulting_line += char
-            elif char == '%':
-                return resulting_line
-            else:
-                resulting_line += char
+            for char in line:
+                if escaped:
+                    escaped = False
+                    resulting_line += char
+                elif char == '\\':
+                    escaped = True
+                    resulting_line += char
+                elif char == '%':
+                    return resulting_line
+                else:
+                    resulting_line += char
 
-        result += resulting_line + "\n"
+            result += resulting_line + "\n"
 
-    return result
+        file_dict[path] = result
