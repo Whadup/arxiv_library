@@ -19,7 +19,5 @@ if __name__ == "__main__":
         exp_out_path = os.path.join(output_dir, arxiv_dir + ".json")
         assert_files_are_equal(output_path, exp_out_path)
 
-
     shutil.rmtree(tmp_dir)
     print("Test was succesful :)")
-

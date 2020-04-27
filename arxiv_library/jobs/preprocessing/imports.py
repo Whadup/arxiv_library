@@ -25,13 +25,10 @@ def find_main(root):
 
 def resolve(file_name, root_dir, depth=3):
     """Resolve all imports in a given latex file.
-    :param file_name: A string denoting the name of the file
-    that should be resolved.
-    :param root_dir: A string denoting the absolute directory
-    root, in which the file of the paper is located.
-    :param depth:
-    :returns: A string with all importing latex commands recursively
-    resolved.
+    :param file_name: A string denoting the name of the file that should be resolved.
+    :param root_dir: A string denoting the absolute directory root, in which the file of the paper is located.
+    :param depth: The max depth searched in the folder structure.
+    :returns: A string with all importing latex commands recursively resolved.
     """
 
     file_path = os.path.join(root_dir, file_name)
