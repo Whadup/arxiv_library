@@ -216,8 +216,8 @@ def resolve(file_name, root_dir, curr_dir, maxdepth=3):
                     tex = tex.replace(match.group(), "")
                     continue
 
-                in_file = h.assure_valid_extension(in_file)
                 in_file = path.join(root_dir, in_file)
+                in_file = h.assure_valid_extension(in_file)
 
                 in_file_name = path.basename(in_file)
                 curr_dir = path.dirname(in_file)
@@ -236,8 +236,8 @@ def resolve(file_name, root_dir, curr_dir, maxdepth=3):
                     tex = tex.replace(match.group(), "")
                     continue
 
-                in_file = h.assure_valid_extension(in_file)
                 in_file = path.join(root_dir, in_file)
+                in_file = h.assure_valid_extension(in_file)
 
                 in_file_name = path.basename(in_file)
                 curr_dir = path.dirname(in_file)
@@ -259,8 +259,8 @@ def resolve(file_name, root_dir, curr_dir, maxdepth=3):
                     tex = tex.replace(match.group(), "")
                     continue
 
-                in_file = h.assure_valid_extension(in_file)
                 in_file = path.join(curr_dir, in_file)
+                in_file = h.assure_valid_extension(in_file)
 
                 in_file_name = path.basename(in_file)
                 curr_dir = path.dirname(in_file)
@@ -282,8 +282,8 @@ def resolve(file_name, root_dir, curr_dir, maxdepth=3):
                     tex = tex.replace(match.group(), "")
                     continue
 
-                in_file = h.assure_valid_extension(in_file)
                 in_file = path.join(curr_dir, in_file)
+                in_file = h.assure_valid_extension(in_file)
 
                 in_file_name = path.basename(in_file)
                 curr_dir = path.dirname(in_file)
