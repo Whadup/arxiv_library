@@ -10,8 +10,8 @@ import json
 from multiprocessing import Pool
 from tqdm import tqdm
 
-import arxiv_library.compilation.mathml_compile as mathml_compile
-from arxiv_library.utils.multiprocessing_logging import install_mp_handler
+import arxiv_library.jobs.compilation.mathml_compile as mathml_compile
+from arxiv_library.io.multiprocessing_logging import install_mp_handler
 import arxiv_library.utils.utils as h
 import arxiv_library.jobs.config as c
 
@@ -25,7 +25,7 @@ def extract_from_equation_file(formula_file):
         with open(formula_file, 'r') as f:
             paper_dict = json.load(f)
             paper_id = os.path.basename(formula_file).replace(".json", "")
-            paper_dict = mathml_compile.compile_paper(paper_dict)
+            paper_dict = mathml_compile.compile_paper(paper_dict, paper_id=paper_id)
         with open(formula_file, "w") as f:
             json.dump(paper_dict, f, indent=4, sort_keys=True)
     except Exception:
