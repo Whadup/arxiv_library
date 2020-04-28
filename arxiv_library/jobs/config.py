@@ -8,7 +8,7 @@ PACKAGE_DEF = "usepackage"
 
 ENCODINGS = ['utf-8', 'cp1252']
 
-NUM_WORKERS = 6
+NUM_WORKERS = 40
 
 DEF = "\\def"
 

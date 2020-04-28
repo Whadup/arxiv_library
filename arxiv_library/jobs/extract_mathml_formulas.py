@@ -5,6 +5,7 @@ import os
 import argparse
 import logging
 import traceback
+import json
 
 from multiprocessing import Pool
 from tqdm import tqdm
@@ -21,7 +22,12 @@ def extract_from_equation_file(formula_file):
 
     formula_file = os.path.join(c.JSON_LOCATION, formula_file)
     try:
-        mathml_compile.compile_eqs_in_paper(formula_file)
+        with open(formula_file, 'r') as f:
+            paper_dict = json.load(f)
+            paper_id = os.path.basename(formula_file).replace(".json", "")
+            paper_dict = mathml_compile.compile_paper(paper_dict)
+        with open(formula_file, "w") as f:
+            json.dump(paper_dict, f, indent=4, sort_keys=True)
     except Exception:
         logging.warning(traceback.format_exc() + "in file %s", formula_file)
 
