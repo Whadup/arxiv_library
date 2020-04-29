@@ -6,11 +6,11 @@ import logging
 import traceback
 from multiprocessing import Pool
 
-import arxiv_library.preprocessing.preprocessing as preprocessing
+import arxiv_library.jobs.preprocessing.preprocessing as preprocessing
 import arxiv_library.jobs.config as c
-import arxiv_library.preprocessing.env_parser as env_parser
+import arxiv_library.jobs.extraction.env_parser as env_parser
 import arxiv_library.utils.utils as h
-from arxiv_library.utils.multiprocessing_logging import install_mp_handler
+from arxiv_library.io.multiprocessing_logging import install_mp_handler
 
 
 
