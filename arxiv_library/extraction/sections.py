@@ -6,15 +6,10 @@ _latex_section = re.compile(r"\\section\{(.*?)\}")
 def extract_sections(paper_dict):
     tex_string = paper_dict['paper']
     sections = {}
-    indices = []  # (start, end)
+    indices = []
 
-    while True:
-        next_section = _latex_section.search(tex_string)
-
-        if next_section is None:
-            break
-
-        indices.append((next_section.start(), next_section.end()))
+    for match in re.finditer(_latex_section, tex_string):
+        indices.append((match.start(), match.end()))
 
     for i in range(len(indices)):
         section_start = indices[i][1]
@@ -22,3 +17,4 @@ def extract_sections(paper_dict):
         sections[i] = tex_string[section_start:section_end]
 
     paper_dict['sections'] = sections
+    return paper_dict

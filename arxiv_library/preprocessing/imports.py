@@ -1,14 +1,12 @@
-import arxiv_library.utils.utils as utils
-import logging
 import os
 import re
 
 
 _regexs = [
-    (re.compile(r"\\input(\{.*?\})"), False),  # (regex, filepath has path prefix as argument)
-    (re.compile(r"\\include(\{.*?\})"), False),
-    (re.compile(r"\\subimport\*?(\{.*?\})(\{.*?\})"), True),
-    (re.compile(r"\\import\*?(\{.*\})(\{.*?\})"), True)
+    re.compile(r"\\input\{(\./)??P<path>(.*?)\}"),
+    re.compile(r"\\include\{(\./)??P<path>(.*?)\}"),
+    re.compile(r"\\subimport\{?P<folder>(.*?)\}\{?P<path>(.*?)\}"),
+    re.compile(r"\\import\{?P<folder>(.*?)\}\{?P<path>(.*?)\}")
 ]
 
 
@@ -16,7 +14,10 @@ def resolve_imports(file_dict):
     for path, text in file_dict.items(): 
         if path.endswith('.tex'):
             if '\\begin{document}' in text:
-                return _resolve_imports(path, file_dict)
+                try:
+                    return {'paper': _resolve_imports(path, file_dict)}
+                except Exception as exception:
+                    raise exception
 
     raise ValueError('Did not find file with \\begin{{document}} in file dict.')
 
@@ -27,12 +28,17 @@ def _resolve_imports(path, file_dict, depth=3):
     if depth == 0:
         return tex_string
 
-    for regex, has_path_prefix in _regexs:
+    for regex in _regexs:
         for match in regex.finditer(file_dict[path]):
-            matched_path = match.groups()[0].strip("{}")
+            matched_path = match.group('path')
 
-            if has_path_prefix:
-                matched_path = os.path.join(matched_path, match.groups()[1].strip("{}"))
+            if match.group('folder'):
+                matched_path = os.path.join(match.group('prefix'), matched_path)
+
+            # TODO Gibt es hier eine bessere Lösung? Ist das zwangsweise eine tex file?
+
+            if '.' not in matched_path:
+                matched_path += '.tex'
 
             if '.tikz' in matched_path:
                 tex_string = tex_string.replace(match.group(), ''); continue

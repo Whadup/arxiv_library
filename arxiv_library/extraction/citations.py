@@ -46,8 +46,12 @@ def extract_citations(paper_dict):
         if not match:
             for regex in _arxiv_ids_old:
                 match = regex.search(item)
-                break
 
-        bib_ids.add(match.group(0))
+                if match is not None:
+                    break
 
-    return bib_ids
+        if match is not None:
+            bib_ids.add(match.group(0))
+
+    paper_dict['citations'] = bib_ids
+    return paper_dict

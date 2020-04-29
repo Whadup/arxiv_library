@@ -18,10 +18,12 @@ def remove_comments(file_dict):
                     escaped = True
                     resulting_line += char
                 elif char == '%':
-                    return resulting_line
+                    break
                 else:
                     resulting_line += char
 
             result += resulting_line + "\n"
 
         file_dict[path] = result
+
+    return file_dict

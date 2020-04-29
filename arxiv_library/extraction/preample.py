@@ -5,13 +5,13 @@ _latex_braces_l = re.compile(r"(\\\{|\{)")
 _latex_braces_r = re.compile(r"(\\\}|\})")
 
 
-def extract_preamble(tex_string):
+def extract_preamble(file_dict):
     """
     Extract everything before the begin document command with the goal to get most of the used packages and self
     defined commands.
     """
 
-    preamble = tex_string.split('\\begin{document}')[0]
+    preamble = file_dict['paper'].split('\\begin{document}')[0]
     macros = []
     brace_count = 0
 
@@ -25,4 +25,4 @@ def extract_preamble(tex_string):
             brace_count += len([x for x in _latex_braces_l.findall(line) if len(x) == 1])
             brace_count -= len([x for x in _latex_braces_r.findall(line) if len(x) == 1])
 
-    return {'preamble': macros, 'paper': tex_string.split('\\begin{document}')[1]}
+    return {'preamble': macros, 'paper': file_dict['paper'].split('\\begin{document}')[1]}
