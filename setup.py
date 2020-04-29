@@ -1,4 +1,4 @@
-from setuptools import setup
+from setuptools import setup, find_packages
 
 setup(name='arxiv_library',
       version='0.1',
@@ -7,7 +7,8 @@ setup(name='arxiv_library',
       author=u'Lukas Pfahler, Jonathan Schill, Jan Richter',
       author_email='{lukas.pfahler, jonathan.schill, jan-philip.richter}@tu-dortmund.de',
       license='MIT',
-      packages=['arxiv_library'],
+      packages=find_packages(),
       install_requires=['arxiv', 'tqdm'],
-      zip_safe=False
+      zip_safe=False,
+      include_package_data=True,
 )

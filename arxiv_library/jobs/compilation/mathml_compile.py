@@ -107,9 +107,12 @@ def call_js(paper_dict, paper_id=""):
             capture_output=True,
             timeout=120
         )
+        if result.stderr:
+            logging.warning(result.stderr)
         # print(result.stdout)
         # print(result.stderr)
         result = json.loads(result.stdout)
+        result["preamble"] = result["preamble"].split("\n")
         return result
     except subprocess.TimeoutExpired:
         logging.warning("Timeout for paper {}: \n".format(paper_id) + "\n")
