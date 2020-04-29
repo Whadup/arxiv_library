@@ -22,6 +22,7 @@ def format_id(txt_file):
     The arxiv API cannot deal with this format. So, this function translates our format into a 
     format that is suitable for the arxiv API.
     """
+
     arxiv_id = txt_file.replace(".json", "")
     has_version_tag = paper_version_re.match(arxiv_id)
     assert has_version_tag is None, "WARNING your json files use arxiv-ids with version:" + arxiv_id
