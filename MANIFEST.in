@@ -1,1 +1,1 @@
-recursive-include arxiv_library/jbos/compilation/js *
+recursive-include arxiv_library/jobs/compilation/js *
