@@ -58,7 +58,7 @@ stdin.on('end', function () {
                         strict:"ignore",
                     });
                 parsedData.sections[i].equations[j].mathml = mml;
-                process.stdout.write("\n");
+                // process.stdout.write("\n");
                 // '<span class="katex">...</span>'
             } catch (e) {
                 if (e instanceof katex.ParseError) {
@@ -73,9 +73,9 @@ stdin.on('end', function () {
             }
         }
     }
-    stdout.write(JSON.stringify(parsedData, null, '    '));
-    stdout.write('\n');
-    process.exit(0);
+    var write = stdout.write(JSON.stringify(parsedData, null, '    '), () => {
+        process.exit(0);//console.log('The data has been flushed');
+    });
 });
 
 // try {
