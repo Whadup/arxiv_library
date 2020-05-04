@@ -2,6 +2,7 @@ import io_pkg.path_config as path_config
 from io_pkg.archive_extraction import extract_arxiv_month
 import json
 from tqdm import tqdm
+import os
 
 if __name__ == "__main__":
     tar_location = path_config.get_path("tar_location")

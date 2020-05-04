@@ -4,7 +4,7 @@ import os
 
 configuarable_paths = ["json_location", "tar_location", "tmp_tar", "file_dict_location"]
 
-config_json_path = "path_config.json"
+config_json_path = "io_pkg/path_config.json"
 
 # After first call of get_path we store the dict here, so that we dont need IO for every following cool. This variable is reset to None if set_path is called.
 cached = None
@@ -37,7 +37,7 @@ def get_path(path_id):
         raise FileNotFoundError("There is no json file for the path configuration yet. Create one by using the set_path function of this module.")
 
     if cached:
-        if path_id not in config_dict:
+        if path_id not in cached:
             raise ValueError("The configuration for the requested path is not set yet. You can set it by using the set_path function of this module.")
         return cached[path_id]
     else:
