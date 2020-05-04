@@ -1,84 +1,63 @@
-""" Query arxiv API for meta_data for the papers in the JSON_LOCATION. """
 import arxiv
 import os
 import itertools
 import json
-from tqdm import tqdm
 import re
 import logging
+from tqdm import tqdm
 
-# Get the meta_dat for CHUNK_SIZE papers at once
-CHUNK_SIZE = 100
 
-paper_version_re = re.compile(r"v[0-9]+$")
+_chunk_size = 100  # get the meta_data for _chunk_size papers at once
+_paper_version_tag = re.compile(r"v[0-9]+$")
 
-def format_id(txt_file):
-    """ Until March 2007 arxiv-ids had a prefix that tells the archive and subject class of the paper.
-    E. g. math.GT/0309136 (archive.subjet_class/yearmonthnumber). Our dirs with the tex-sources cannot
-    be named like this because "/" is forbidden for UNIX-Paths. They are named like this math0309136.
-    The arxiv API cannot deal with this format. So, this function translates our format into a
-    format that is suitable for the arxiv API.
+
+def id_from_filename(filename):
+    """ Until March 2007 arxiv-ids had a prefix that tells the archive and subject class of the paper. E.g.
+    math.GT/0309136 (archive.subjet_class/yearmonthnumber). Our dirs with the tex-sources cannot be named like this
+    because "/" is forbidden for UNIX-Paths. They are named like this math0309136. The arxiv API cannot deal with this
+    format. This function translates our format into a format that is suitable for the arxiv API.
     """
 
-    arxiv_id = txt_file.replace(".json", "")
-    has_version_tag = paper_version_re.match(arxiv_id)
-    assert has_version_tag is None, "WARNING your json files use arxiv-ids with version:" + arxiv_id
-    first_char = arxiv_id[0]
+    if _paper_version_tag.match(filename):
+        raise ValueError('Found version tag in file name {}, no version tags allowed.'.format(filename))
 
-    if first_char.isdigit():
-        return arxiv_id
-    else:
-        subject, no = ["".join(x) for _, x in itertools.groupby(arxiv_id, key=str.isdigit)]
-        return subject + "/" + no
+    filename = filename.replace('.json', '')
 
+    # if the first character is a digit the id respects the newer arxiv id format
 
-def chunks(l, n):
-    """Yield successive n-sized chunks from l."""
-    for i in range(0, len(l), n):
-        yield l[i:i + n]
+    if filename[0].isdigit():
+        return filename
+
+    return '/'.join(["".join(x) for _, x in itertools.groupby(filename, key=str.isdigit)])
 
 
-def store_meta_data_chunk(response, overwrite=False, test_dir=None):
-    """ Take a list of responeses and store the retrieved data in the respective json-files. """
-    for paper in response:
+def recieve_meta_data(arxiv_ids, folder, overwrite=False):
+    for chunk in tqdm(arxiv_ids[i:i+_chunk_size] for i in range(0, len(arxiv_ids), _chunk_size)):
+        response = arxiv.query(id_list=chunk)
 
-        # retrieve id in the format that we can store locally (See description of format_id).
-        # paper['id'] gives the url under which the paper (more precis is abstract [abs/]) is available.
-        paper_id = paper["id"].split("abs/")[1].replace("/", "")
-        paper_id = paper_version_re.sub("", paper_id)
+        for paper in response:
+            # retrieve id in the format that we can store locally (See description of format_id). paper['id'] gives the
+            # url under which the paper (more precis is abstract [abs/]) is available
 
-        if test_dir:
-            out_file_path = os.path.join(test_dir, paper_id + ".json")
-        else:
-            out_file_path = os.path.join(c.JSON_LOCATION, paper_id + ".json")
+            paper_id = paper["id"].split("abs/")[1].replace("/", "")
+            paper_id = _paper_version_tag.sub("", paper_id)
+            paper_path = os.path.join(folder, paper_id + ".json")
 
-        # Since we fetch meta_data for all papers for that we have json files,
-        # there should be json file for the id that we extracted from the response
-        assert os.path.isfile(out_file_path), "There is no file for the id extracted from an arxiv api response. The file should be: " + out_file_path
+            # Since we fetch meta_data for all papers for that we have json files, there should be json file for the
+            # id that we extracted from the response
 
-        paper_dict = None
-        with open(out_file_path, 'r') as f:
-            paper_dict = json.load(f)
+            if not os.path.isfile(paper_path):
+                raise ValueError('Could not find paper file {} when trying to recieve meta data.'.format(paper_path))
 
-        stored_id = paper_dict.get('id', None)
-        if stored_id is not None and not overwrite:
-            logging.info("The file {} already exists with the respective entries. Overwrite option is off. Skipping...".format(out_file_path))
-            continue
+            with open(paper_path, 'r') as file:
+                paper_dict = json.load(file)
 
-        with open(out_file_path, 'w') as f:
-            paper_dict.update(paper)
-            json.dump(paper_dict, f, indent=4, sort_keys=True)
+            stored_id = paper_dict.get('id', None)
 
+            if stored_id is not None and not overwrite:
+                logging.info('The file {} already exists. Overwrite option is off.'.format(paper_path))
+                continue
 
-def get_all_meta_data(paper_ids, test_dir=None):
-    id_chunks = chunks(paper_ids, CHUNK_SIZE)
-
-    for chunk in tqdm(id_chunks):
-        resp = arxiv.query(id_list=chunk)
-        store_meta_data_chunk(resp, test_dir=test_dir)
-
-
-if __name__ == '__main__':
-    logging.basicConfig(filename="extract_meta_data.log", level=logging.INFO)
-    paper_ids = [format_id(paper_id) for paper_id in os.listdir(c.JSON_LOCATION)]
-    get_all_meta_data(paper_ids)
+            with open(paper_path, 'w') as file:
+                paper_dict.update(paper)
+                json.dump(paper_dict, file, indent=4, sort_keys=True)
