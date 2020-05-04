@@ -45,7 +45,7 @@ if __name__ == '__main__':
     main()
 
 import io_pkg.path_config as path_config
-from io_pkg.archive_extraction import extract_arxiv_month
+from io_pkg.targz import extract_arxiv_month
 import json
 from tqdm import tqdm
 import os
@@ -61,12 +61,12 @@ if __name__ == "__main__":
             json.dump(file_dicts, f)
 
 
-from io_pkg.archive_extraction import extract_arxiv_month
+from io_pkg.targz import extract_arxiv_month
 import argparse
 from datetime import datetime as dt
 import json
 
-from io_pkg.archive_extraction import extract_arxiv_month
+from io_pkg.targz import extract_arxiv_month
 import argparse
 from datetime import datetime as dt
 import json
