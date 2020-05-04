@@ -86,9 +86,10 @@ def prepare_js_json(paper_dict):
     paper_dict["preamble"] = paper_dict["preamble"].replace("\\newcommand*", "\\newcommand") # TODO: why?
     for sec in paper_dict["sections"]:
         for eq in sec["equations"]:
-            eq['latex'] = substitute_from_dict(eq["latex"], LATEX_SUBS)
-            if '&' in eq or r'\n' in repr(eq):
-                eq["latex"] = r"\begin{aligned}" + eq['latex'] + r"\end{aligned}"
+            # eq['latex'] = substitute_from_dict(eq["latex"], LATEX_SUBS)
+            # if '&' in eq or r'\n' in repr(eq):
+            #     eq["latex"] = r"\begin{aligned}" + eq['latex'] + r"\end{aligned}"
+            eq['latex'] = r"\begin{aligned}" + substitute_from_dict(eq["latex"], LATEX_SUBS) + r"\end{aligned}"
     return paper_dict
 
 def call_js(paper_dict, paper_id=""):
