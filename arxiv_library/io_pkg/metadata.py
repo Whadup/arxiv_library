@@ -23,8 +23,6 @@ def id_from_filename(filename):
 
     filename = filename.replace('.json', '')
 
-    # if the first character is a digit the id respects the newer arxiv id format
-
     if filename[0].isdigit():
         return filename
 
