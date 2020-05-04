@@ -37,6 +37,7 @@ def extract_arxiv_month(tar_archive):
         elif paper_gz.endswith(".gz"):
             file_dict = process_paper_gz(paper_gz, subdir)
             file_dicts.append(file_dict)
+            os.rmtree(subdir)
         else:
             logging.warning("Unknown file ending: {}".format(paper_gz))
 
