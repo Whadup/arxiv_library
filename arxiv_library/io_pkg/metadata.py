@@ -7,7 +7,6 @@ import logging
 from tqdm import tqdm
 
 
-_chunk_size = 100  # get the meta_data for _chunk_size papers at once
 _paper_version_tag = re.compile(r"v[0-9]+$")
 
 
@@ -29,8 +28,8 @@ def id_from_filename(filename):
     return '/'.join(["".join(x) for _, x in itertools.groupby(filename, key=str.isdigit)])
 
 
-def recieve_meta_data(arxiv_ids, folder, overwrite=False):
-    for chunk in tqdm(arxiv_ids[i:i+_chunk_size] for i in range(0, len(arxiv_ids), _chunk_size)):
+def recieve_meta_data(arxiv_ids, folder, overwrite=False, chunk_size=100):
+    for chunk in tqdm(arxiv_ids[i:i+chunk_size] for i in range(0, len(arxiv_ids), chunk_size)):
         response = arxiv.query(id_list=chunk)
 
         for paper in response:
