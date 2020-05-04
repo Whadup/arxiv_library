@@ -7,12 +7,13 @@ import logging
 import re
 import json
 from chardet.universaldetector import UniversalDetector
+import path_config
 
 # if .gz is actually a gz file with only one tex file in it,
 # the file/magic command gives something with : '[...]was "main.tex"[..]'
 single_gz_re = re.compile(r"was \".*?\"")
 
-def extract_arxiv_month(tar_archive, tmp_dir):
+def extract_arxiv_month(tar_archive):
     """ 
     The tars are organised monthwise. E. g. the tar archive arXiv_src_0305_001.tar
     contains all papers of May 2003. In this tar archive is a (tar).gz for every paper.
@@ -21,11 +22,11 @@ def extract_arxiv_month(tar_archive, tmp_dir):
     The arg tmp_dir gives a directory where the tar_archive can be temporarally extracted to.
     """
     tar = tarfile.open(tar_archive, mode="r")
-    tar.extractall(tmp_dir)
+    tar.extractall(path_config.get_path("tmp_tar"))
 
     # get subdir to that tar was extracted
     names = tar.getnames()
-    subdir = os.path.join(tmp_dir, names[0])
+    subdir = os.path.join(path_config.get_path("tmp_tar"), names[0])
 
     file_dicts = []
 
