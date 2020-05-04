@@ -47,6 +47,8 @@ def process_paper_gz(paper_gz, subdir):
     gz_path = os.path.join(subdir, paper_gz)
     file_dict = {}
 
+    file_dict["arxiv_id"] = paper_gz.replace(".gz", "")
+
     # There are .gz files that were a singular tex-file and there are .gz files that were directories
     # with multiple files and tex-directories. In the latter case the .gz is actually a tar.gz and has
     # to be handled differently. We can detect this with the following two lines.
@@ -86,13 +88,8 @@ def decode_n_store(raw_bytes, file_dict, file_path, paper):
     and put the resulting string into the file_dict with file_path as key.
     The arg paper is needed for proper error reports.
     """
-
-    #TODO make this faster with "detecting encoding incrementally" https://chardet.readthedocs.io/en/latest/usage.html#basic-usage
-    # encoding = chardet.detect(raw_bytes)["encoding"]
-
+    # Detect the encoding
     detector = UniversalDetector()
-    # print(type(raw_bytes))
-    # print(dir(raw_bytes))
     for line in raw_bytes.splitlines():
         detector.feed(line)
         if detector.done: break
