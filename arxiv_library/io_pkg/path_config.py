@@ -2,7 +2,7 @@ import json
 import os
 
 
-configuarable_paths = ["json_location", "tar_location", "tmp_tar"]
+configuarable_paths = ["json_location", "tar_location", "tmp_tar", "file_dict_location"]
 
 config_json_path = "path_config.json"
 
