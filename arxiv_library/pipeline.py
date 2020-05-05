@@ -6,7 +6,7 @@ import io_pkg.metadata
 import io_pkg.paths
 import preprocessing.comments
 import preprocessing.imports
-import extraction.preample
+import extraction.preamble
 import extraction.sections
 import extraction.equations
 import extraction.citations
@@ -33,7 +33,7 @@ def _pipe(file_dict):
         file_dict = preprocessing.comments.remove_comments(file_dict)
         paper_dict = preprocessing.imports.resolve_imports(file_dict)
 
-        paper_dict = extraction.preample.extract_preamble(paper_dict)
+        paper_dict = extraction.preamble.extract_preamble(paper_dict)
         paper_dict = extraction.sections.extract_sections(paper_dict)
         paper_dict = extraction.equations.extract_equations(paper_dict)
         paper_dict = extraction.citations.extract_citations(paper_dict)

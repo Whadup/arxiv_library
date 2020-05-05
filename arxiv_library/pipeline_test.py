@@ -1,7 +1,7 @@
 import json
 import preprocessing.comments
 import preprocessing.imports
-import extraction.preample
+import extraction.preamble
 import extraction.sections
 import extraction.equations
 import extraction.citations
