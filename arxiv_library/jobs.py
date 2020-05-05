@@ -12,6 +12,22 @@ from arxiv_library.utils.multiprocessing_logging import install_mp_handler
 import arxiv_library.utils.utils as h
 import arxiv_library.jobs.config as c
 
+from io_pkg.targz import extract_arxiv_month
+import argparse
+from datetime import datetime as dt
+import json
+
+from io_pkg.targz import extract_arxiv_month
+import argparse
+from datetime import datetime as dt
+import json
+
+import io_pkg.paths as path_config
+from io_pkg.targz import extract_arxiv_month
+import json
+from tqdm import tqdm
+import os
+
 
 def extract_from_equation_file(formula_file):
     """Extract formulas, important packages and macros from tex-sources.
@@ -22,6 +38,7 @@ def extract_from_equation_file(formula_file):
         mathml_compile.compile_eqs_in_paper(formula_file)
     except Exception:
         logging.warning(traceback.format_exc() + "in file %s", formula_file)
+
 
 def main():
     """Main job"""
@@ -41,14 +58,9 @@ def main():
         results = pool.imap(extract_from_equation_file, workload)
         results = list(tqdm(results))
 
+
 if __name__ == '__main__':
     main()
-
-import io_pkg.path_config as path_config
-from io_pkg.targz import extract_arxiv_month
-import json
-from tqdm import tqdm
-import os
 
 if __name__ == "__main__":
     tar_location = path_config.get_path("tar_location")
@@ -59,17 +71,6 @@ if __name__ == "__main__":
         file_dicts_out_path = os.path.join(file_dict_location, arxiv_month.replace(".tar", ".json"))
         with open(file_dicts_out_path, 'w') as f:
             json.dump(file_dicts, f)
-
-
-from io_pkg.targz import extract_arxiv_month
-import argparse
-from datetime import datetime as dt
-import json
-
-from io_pkg.targz import extract_arxiv_month
-import argparse
-from datetime import datetime as dt
-import json
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()

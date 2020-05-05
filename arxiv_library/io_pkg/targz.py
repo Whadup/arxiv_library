@@ -7,7 +7,7 @@ import logging
 import re
 import json
 from chardet.universaldetector import UniversalDetector
-import io_pkg.path_config as path_config
+import io_pkg.paths as path_config
 import shutil
 
 # if .gz is actually a gz file with only one tex file in it,
