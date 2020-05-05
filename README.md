@@ -1,6 +1,6 @@
 # arxiv_library
 
-##Usage of internal python functions
+## Usage of internal python functions
 
 #### tar-extraction:
 You may retrieve all file_dicts for a tar archive with all papers from one month like this:
@@ -25,6 +25,7 @@ call job 1
 
 call job 2
 ..
+
 ----------
 Pipeline modules:
 
