@@ -35,19 +35,3 @@ with open('/home/jan/temp.json', 'r') as file:
 
 
 paper_dicts = []
-
-
-for f in file_dicts:
-    try:
-        f = preprocessing.comments.remove_comments(f)
-        p = preprocessing.imports.resolve_imports(f)
-
-        p = extraction.preample.extract_preamble(p)
-        p = extraction.sections.extract_sections(p)
-        p = extraction.equations.extract_equations(p)
-        p = extraction.citations.extract_citations(p)
-
-        paper_dicts.append(p)
-
-    except Exception as exception:
-        print(exception)
