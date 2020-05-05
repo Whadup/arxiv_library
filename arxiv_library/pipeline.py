@@ -16,6 +16,9 @@ import extraction.citations
 import compilation.mathml
 
 
+# TODO eine pipeline ohne multithreading und eine ohne multithreading und multiprocessing schreiben und evaluieren
+
+
 _file_dict_queue = queue.Queue()
 _paper_dict_queue = queue.Queue()
 
@@ -33,8 +36,10 @@ def _extract(tar_path):
 
 
 @ray.remote
-def _pipe(file_dict):
+def _pipe(file_dict_id):
     try:
+        file_dict = ray.get(file_dict_id)  # TODO muss ich das hier getten oder nicht?
+
         file_dict = preprocessing.comments.remove_comments(file_dict)
         paper_dict = preprocessing.imports.resolve_imports(file_dict)
 
@@ -43,7 +48,7 @@ def _pipe(file_dict):
         paper_dict = extraction.equations.extract_equations(paper_dict)
         paper_dict = extraction.citations.extract_citations(paper_dict)
 
-        # paper_dict = compilation.mathml.bla(paper_dict)
+        # paper_dict = compilation.mathml.bla(paper_dict)  # TODO hier einmal eine entsprechende Methode schreiben
 
         return paper_dict
 
@@ -52,8 +57,10 @@ def _pipe(file_dict):
 
 
 @ray.remote
-def _save(paper_dict, json_dir):
+def _save(paper_dict_id, json_dir):
     try:
+        paper_dict = ray.get(paper_dict_id)
+
         with open(os.path.join(json_dir, '{}.json'.format(paper_dict['arxiv_id'])), 'w') as file:
             json.dump(paper_dict, file)
 
