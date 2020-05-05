@@ -6,7 +6,8 @@ configuarable_paths = ["json_location", "tar_location", "tmp_tar", "file_dict_lo
 
 config_json_path = "io_pkg/path_config.json"
 
-# After first call of get_path we store the dict here, so that we dont need IO for every following cool. This variable is reset to None if set_path is called.
+# After first call of get_path we store the dict here, so that we dont need IO for every following cool. This variable
+# is reset to None if set_path is called.
 cached = None
 
 

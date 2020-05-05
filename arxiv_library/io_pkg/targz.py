@@ -1,18 +1,17 @@
-import chardet
 import tarfile
 import gzip
 import magic
 import os
 import logging
 import re
-import json
-from chardet.universaldetector import UniversalDetector
-import io_pkg.paths as path_config
 import shutil
+import io_pkg.paths as path_config
+from chardet.universaldetector import UniversalDetector
 
 # if .gz is actually a gz file with only one tex file in it,
 # the file/magic command gives something with : '[...]was "main.tex"[..]'
 single_gz_re = re.compile(r"was \".*?\"")
+
 
 def extract_arxiv_month(tar_archive):
     """ 
@@ -48,9 +47,7 @@ def extract_arxiv_month(tar_archive):
 def process_paper_gz(paper_gz, subdir):
     """Extract a (tar).gz-file of a paper and return it as a file_dict."""
     gz_path = os.path.join(subdir, paper_gz)
-    file_dict = {}
-
-    file_dict["arxiv_id"] = paper_gz.replace(".gz", "")
+    file_dict = {"arxiv_id": paper_gz.replace(".gz", "")}
 
     # There are .gz files that were a singular tex-file and there are .gz files that were directories
     # with multiple files and tex-directories. In the latter case the .gz is actually a tar.gz and has
@@ -73,7 +70,8 @@ def process_paper_gz(paper_gz, subdir):
 
             # Extract every "tex" or "bbl" member of the tar archive
             for gz_name in gz_names:
-                #TODO do we need other files? 
+                # TODO do we need other files?
+
                 if not gz_name.endswith(".tex") and not gz_name.endswith(".bbl"):
                     continue
                 gz_buffer = tar_gz.extractfile(gz_name)
@@ -99,7 +97,8 @@ def decode_n_store(raw_bytes, file_dict, file_path, paper):
     detector.close()
     encoding = detector.result['encoding']
     
-    #TODO Exception handling when no encoding is found
+    # TODO Exception handling when no encoding is found
+
     if encoding:
         try:
             decoded = raw_bytes.decode(encoding)
@@ -107,4 +106,3 @@ def decode_n_store(raw_bytes, file_dict, file_path, paper):
             file_dict[file_path + "_enc"] = encoding
         except UnicodeDecodeError:
             logging.warning("Decode Error for file {} in paper {}".format(file_path, paper))
-

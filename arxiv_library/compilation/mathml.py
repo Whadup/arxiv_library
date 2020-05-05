@@ -138,15 +138,3 @@ def compile_eqs_in_paper(extracted_eqs_file):
 
     with open(extracted_eqs_file, 'w') as f:
         json.dump(paper_dict, f, indent=4, sort_keys=True)
-
-
-if __name__ == "__main__":
-    file_path = "/home/schill/arxiv/json_db_old/1505.06478.json"
-    with open(file_path) as f:
-        pd = json.load(f)
-        eq = pd["sections"][1]['equations'][0]
-        preamble = pd["preamble"]
-        preamble = [substitute_from_dict(preamble_entry, PREAMBLE_SUBS) for preamble_entry in preamble]
-        full_preamble = PREAMBLE_HOTFIX + preamble
-        preamble_lines = "\n".join(full_preamble)
-        compile_one_eq(eq, preamble_lines, "xxxx.xxxx")
