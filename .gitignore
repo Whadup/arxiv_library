@@ -3,3 +3,4 @@ __pycache__/
 arxiv_library.egg-info/
 .vscode/settings.json
 .idea/*
+venv/*
