@@ -10,6 +10,12 @@ import extraction.preample
 import extraction.sections
 import extraction.equations
 import extraction.citations
+import compilation.mathml
+from multiprocessing import Queue
+
+
+_file_dict_queue = Queue()
+_paper_dict_queue = Queue()
 
 
 @ray.remote
@@ -39,6 +45,12 @@ def _pipe(file_dict):
 
 
 @ray.remote
+def _compile(paper_dict):
+    try:
+
+
+
+@ray.remote
 def _save(paper_dict, json_dir):
     try:
         with open(os.path.join(json_dir, '{}.json'.format(paper_dict['arxiv_id'])), 'w') as file:
@@ -50,13 +62,6 @@ def _save(paper_dict, json_dir):
 
 def pipeline(tar_dir, json_dir):
     ray.init()
-
-    tar_paths = os.listdir(tar_dir)
-    file_dict_ids = []
-
-    for path in tar_paths:
-        for file_dict_id in _extract.remote(path):
-            file_dict_ids.append(file_dict_id)
 
     while True:
         ready_file_dict_ids, remaining_file_dict_ids = ray.wait(file_dict_ids, num_returns=32)
