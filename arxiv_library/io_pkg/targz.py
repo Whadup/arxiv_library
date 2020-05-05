@@ -13,6 +13,41 @@ from chardet.universaldetector import UniversalDetector
 single_gz_re = re.compile(r"was \".*?\"")
 
 
+class TarMonthExtractor():
+    """
+    Can be used with the ```with obj as p``` syntax. obj is a object of this class and p are the paths to the gzs
+    that we extract with the __enter__ method.
+    The constructor needs the path to a tar archive with all arxiv_papers of a specific month.
+    Via the with-syntax we can extract the gzs within the tar, retrieve the paths to the gzs and this class will cleanup
+    the extracted files automatically, when we leave the with block.
+    """
+    def __init__(self, archive_path):
+        self.archive_path = archive_path
+        self.tmp_tar = path_config.get_path("tmp_tar")
+
+    def __enter__(self):
+        tar = tarfile.open(self.archive_path, mode='r')
+        tar.extractall(self.tmp_tar)
+        names = tar.getnames()
+        self.subdir = os.path.join(self.tmp_tar, names[0])
+        paths = [os.path.join(self.tmp_tar, name) for name in names[1:]]
+        return paths
+
+    def __exit__(self, type, value, traceback):
+        shutil.rmtree(self.subdir)
+
+
+def gz_to_file_dict(gz_path):
+    print(gz_path)
+    if gz_path.endswith(".pdf"):
+        return {}
+    elif gz_path.endswith(".gz"):
+        file_dict = process_paper_gz(gz_path)
+        return file_dict
+    else:
+        logging.warning("Unknown file ending: {}".format(gz_path))
+
+
 def extract_arxiv_month(tar_archive):
     """ 
     The tars are organised monthwise. E. g. the tar archive arXiv_src_0305_001.tar
@@ -35,7 +70,8 @@ def extract_arxiv_month(tar_archive):
         if paper_gz.endswith(".pdf"):
             continue
         elif paper_gz.endswith(".gz"):
-            file_dict = process_paper_gz(paper_gz, subdir)
+            gz_path = os.path.join(subdir, paper_gz)
+            file_dict = process_paper_gz(gz_path)
             file_dicts.append(file_dict)
         else:
             logging.warning("Unknown file ending: {}".format(paper_gz))
@@ -44,9 +80,9 @@ def extract_arxiv_month(tar_archive):
     return file_dicts
 
 
-def process_paper_gz(paper_gz, subdir):
+def process_paper_gz(gz_path):
     """Extract a (tar).gz-file of a paper and return it as a file_dict."""
-    gz_path = os.path.join(subdir, paper_gz)
+    paper_gz = os.path.basename(gz_path)
     file_dict = {"arxiv_id": paper_gz.replace(".gz", "")}
 
     # There are .gz files that were a singular tex-file and there are .gz files that were directories
