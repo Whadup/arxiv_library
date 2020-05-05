@@ -2,3 +2,6 @@ __pycache__/
 *.pyc
 arxiv_library.egg-info/
 .vscode/settings.json
+.idea/*
+venv/*
+arxiv_library/io_pkg/path_config.json
