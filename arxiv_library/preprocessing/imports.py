@@ -15,7 +15,7 @@ def resolve_imports(file_dict):
         if path.endswith('.tex'):
             if '\\begin{document}' in text:
                 try:
-                    return {'paper': _resolve_imports(path, file_dict)}
+                    return {'paper': _resolve_imports(path, file_dict), 'arxiv_id': file_dict['arxiv_id']}
                 except Exception as exception:
                     raise exception
 
