@@ -36,7 +36,6 @@ _arxiv_ids_old = [re.compile(regex) for regex in _arxiv_ids_old]
 
 def extract_citations(paper_dict):
     tex_string = paper_dict['paper']
-    # bib_string = _latex_bibliography.search(tex_string).groups()[-1]  # brauch man das ueberhaupt?
     bib_items = _latex_bibitem.split(tex_string)
     bib_ids = set()
 

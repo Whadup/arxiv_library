@@ -28,7 +28,9 @@ def id_from_filename(filename):
     return '/'.join(["".join(x) for _, x in itertools.groupby(filename, key=str.isdigit)])
 
 
-def recieve_meta_data(arxiv_ids, folder, overwrite=False, chunk_size=100):
+def recieve_meta_data(arxiv_ids, folder=None, overwrite=False, chunk_size=100):
+    results = []
+
     for chunk in tqdm(arxiv_ids[i:i+chunk_size] for i in range(0, len(arxiv_ids), chunk_size)):
         response = arxiv.query(id_list=chunk)
 
@@ -39,6 +41,13 @@ def recieve_meta_data(arxiv_ids, folder, overwrite=False, chunk_size=100):
             paper_id = paper["id"].split("abs/")[1].replace("/", "")
             paper_id = _paper_version_tag.sub("", paper_id)
             paper_path = os.path.join(folder, paper_id + ".json")
+
+            results.append(paper)
+
+            # if no folder is given we don't save the results and just return the responses
+
+            if not folder:
+                continue
 
             # Since we fetch meta_data for all papers for that we have json files, there should be json file for the
             # id that we extracted from the response
@@ -58,3 +67,5 @@ def recieve_meta_data(arxiv_ids, folder, overwrite=False, chunk_size=100):
             with open(paper_path, 'w') as file:
                 paper_dict.update(paper)
                 json.dump(paper_dict, file, indent=4, sort_keys=True)
+
+    return results

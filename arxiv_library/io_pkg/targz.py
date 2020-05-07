@@ -38,7 +38,6 @@ class TarMonthExtractor():
 
 
 def gz_to_file_dict(gz_path):
-    print(gz_path)
     if gz_path.endswith(".pdf"):
         return {}
     elif gz_path.endswith(".gz"):
@@ -48,7 +47,7 @@ def gz_to_file_dict(gz_path):
         logging.warning("Unknown file ending: {}".format(gz_path))
 
 
-def extract_arxiv_month(tar_archive):
+def extract_arxiv_month(tar_archive):  # TODO darf man diese funktion noch benutzen? wenn nicht privat machen, ich finde hier keine arxiv_ids im paper dict
     """ 
     The tars are organised monthwise. E. g. the tar archive arXiv_src_0305_001.tar
     contains all papers of May 2003. In this tar archive is a (tar).gz for every paper.
