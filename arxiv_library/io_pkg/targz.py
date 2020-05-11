@@ -37,6 +37,46 @@ class TarExtractor:
         shutil.rmtree(self.subdir)
 
 
+def tar_to_file_dict(archive_path):
+    tar = tarfile.open(archive_path, mode='r')
+    mems = tar.getmembers()
+    fds = []
+    for m in mems[1:]:
+        extr = tar.extractfile(m)
+        extr_r = extr.read()
+        if ".pdf" in m.name:
+            continue
+        fd = {"arxiv_id": os.path.basename(m.name).replace(".gz", "")}
+        print(m.name)
+        file_type = magic.from_buffer(extr_r)
+        print(file_type)
+        match = single_gz_re.search(file_type)
+        try:
+            if not match:
+                print("tar")
+                tar_gz = tarfile.open(fileobj=tar.extractfile(m), mode="r")
+
+                gz_names = tar_gz.getnames()
+
+                # Extract every "tex" or "bbl" member of the tar archive
+                for gz_name in gz_names:
+                    # NICETOHAVE do we need other files?
+
+                    if not gz_name.endswith(".tex") and not gz_name.endswith(".bbl"):
+                        continue
+                    gz_buffer = tar_gz.extractfile(gz_name)
+                    raw_bytes = gz_buffer.read()
+                    _decode_n_store(raw_bytes, fd, gz_name, fd["arxiv_id"])
+            else:
+                print("tex")
+                decompressed = gzip.decompress(extr_r)
+                _decode_n_store(decompressed, fd, "main.tex", fd["arxiv_id"])
+        except gzip.BadGzipFile:
+            print("Badgzip")
+        fds.append(fd)
+    return fds
+
+
 def gz_to_file_dict(gz_path):
     if gz_path.endswith(".pdf"):
         return {}
