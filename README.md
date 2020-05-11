@@ -80,3 +80,6 @@ Pipeline modules:
 **filedict**: dict() of files in a paper directory with {relative path: filestring}
 
 **paperdict**: dict() with keys [paper, preamble, sections, equations, citations, metadata] for a single paper
+
+## Dependencies
+For a list of required packages you may take a look at [setup.py](setup.py).

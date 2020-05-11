@@ -4,7 +4,6 @@ import itertools
 import json
 import re
 import logging
-from tqdm import tqdm
 
 
 _paper_version_tag = re.compile(r"v[0-9]+$")
@@ -30,8 +29,9 @@ def id_from_filename(filename):
 
 def recieve_meta_data(arxiv_ids, folder=None, overwrite=False, chunk_size=100):
     results = []
-
-    for chunk in tqdm(arxiv_ids[i:i+chunk_size] for i in range(0, len(arxiv_ids), chunk_size)):
+    # split arxiv_ids into a list of chunks with len of chunk_size
+    chunk_generator = (arxiv_ids[i:i+chunk_size] for i in range(0, len(arxiv_ids), chunk_size))
+    for chunk in chunk_generator:
         response = arxiv.query(id_list=chunk)
 
         for paper in response:
