@@ -24,8 +24,8 @@ _metadata_input_queue = queue.Queue()
 _saving_input_queue = queue.Queue()
 
 _extraction_finished = threading.Event()
-_metadata_finished = threading.Event()
 _pipeline_finished = threading.Event()
+_metadata_finished = threading.Event()
 
 
 @ray.remote
