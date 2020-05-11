@@ -35,7 +35,7 @@ def _resolve_imports(path, file_dict, depth=3):
             if match.group('folder'):
                 matched_path = os.path.join(match.group('folder'), matched_path)
 
-            # TODO Gibt es hier eine bessere Lösung? Ist das zwangsweise eine tex file?
+            # NICETOHAVE Gibt es hier eine bessere Lösung? Ist das zwangsweise eine tex file?
 
             if '.' not in matched_path:
                 matched_path += '.tex'

@@ -33,7 +33,7 @@ class TarExtractor:
         paths = [os.path.join(self.tmp_tar, name) for name in names[1:]]
         return paths
 
-    def __exit__(self, type, value, traceback):
+    def __exit__(self, exc_type, value, traceback):
         shutil.rmtree(self.subdir)
 
 
@@ -73,7 +73,7 @@ def _process_paper_gz(gz_path):
 
             # Extract every "tex" or "bbl" member of the tar archive
             for gz_name in gz_names:
-                # TODO do we need other files?
+                # NICETOHAVE do we need other files?
 
                 if not gz_name.endswith(".tex") and not gz_name.endswith(".bbl"):
                     continue
@@ -100,8 +100,7 @@ def _decode_n_store(raw_bytes, file_dict, file_path, paper):
     detector.close()
     encoding = detector.result['encoding']
     
-    # TODO Exception handling when no encoding is found
-
+    # if chardet could not detect an encoding (encoding is None), we don't make an entry for this file in the file_dict
     if encoding:
         try:
             decoded = raw_bytes.decode(encoding)
