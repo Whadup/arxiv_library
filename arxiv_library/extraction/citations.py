@@ -1,6 +1,5 @@
 import re
 
-_latex_bibliography = re.compile(r'\\begin{thebibliography}(\{[0-9]*\})?(.*?)\\end{thebibliography}')
 _latex_bibitem = re.compile(r'\\bibitem(?:\[[^\]]*\])?\{[^\}]*\}')
 
 _arxiv_id_new = re.compile(r"(?P<id>[0-9]{4}[.]+[0-9]{4,5})(?P<version>v[0-9]+)?")
