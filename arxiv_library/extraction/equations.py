@@ -9,7 +9,8 @@ _latex_environments = [
     re.compile(r'\\begin\{gather\}(\[(.*?)\])?(.*?)\\end\{gather\}', flags=re.DOTALL),
     re.compile(r'\\begin\{align\}(\[(.*?)\])?(.*?)\\end\{align\}', flags=re.DOTALL),
     re.compile(r'\\begin\{flalign\}(\[(.*?)\])?(.*?)\\end\{flalign\}', flags=re.DOTALL),
-    re.compile(r'\$\$(.*?)\$\$', flags=re.DOTALL)
+    re.compile(r'\$\$(.*?)\$\$', flags=re.DOTALL),
+    re.compile(r'\\\[(.*?)\\\]', flags=re.DOTALL)
 ]
 
 
