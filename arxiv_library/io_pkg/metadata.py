@@ -27,7 +27,7 @@ def id_from_filename(filename):
     return '/'.join(["".join(x) for _, x in itertools.groupby(filename, key=str.isdigit)])
 
 
-def recieve_meta_data(arxiv_ids, folder=None, overwrite=False, chunk_size=100):
+def receive_meta_data(arxiv_ids, folder=None, overwrite=False, chunk_size=100):
     results = []
     # split arxiv_ids into a list of chunks with len of chunk_size
     chunk_generator = (arxiv_ids[i:i+chunk_size] for i in range(0, len(arxiv_ids), chunk_size))
