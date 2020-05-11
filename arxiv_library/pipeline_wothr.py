@@ -41,7 +41,7 @@ def pipeline(tar_dir, json_dir):
     tar_paths = os.listdir(tar_dir)
     file_dict_ids = []
 
-    for tar_path in tar_paths:
+    for tar_path in (os.path.join(tar_dir, p) for p in tar_paths):
         with io_pkg.targz.TarExtractor(tar_path) as targz_paths:
             for path in targz_paths:
                 file_dict_ids.append(_extract.remote(path))
