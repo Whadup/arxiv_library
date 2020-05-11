@@ -40,7 +40,6 @@ def receive_meta_data(arxiv_ids, folder=None, overwrite=False, chunk_size=100):
 
             paper_id = paper["id"].split("abs/")[1].replace("/", "")
             paper_id = _paper_version_tag.sub("", paper_id)
-            paper_path = os.path.join(folder, paper_id + ".json")
 
             results.append(paper)
 
@@ -48,6 +47,8 @@ def receive_meta_data(arxiv_ids, folder=None, overwrite=False, chunk_size=100):
 
             if not folder:
                 continue
+
+            paper_path = os.path.join(folder, paper_id + ".json")
 
             # Since we fetch meta_data for all papers for that we have json files, there should be json file for the
             # id that we extracted from the response
