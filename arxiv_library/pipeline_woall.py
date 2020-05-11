@@ -17,7 +17,7 @@ def pipeline(tar_dir, json_dir):
     logging.basicConfig(filename='/home/jan/arxiv_lib/pipeline.log')
     cache = []
 
-    with io_pkg.targz.TarMonthExtractor(tar_dir) as paths:
+    with io_pkg.targz.TarExtractor(tar_dir) as paths:
         for path in paths:
             try:
                 file_dict = io_pkg.targz.gz_to_file_dict(path)

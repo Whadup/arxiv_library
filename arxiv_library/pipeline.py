@@ -16,9 +16,6 @@ import extraction.citations
 import compilation.mathml
 
 
-# TODO eine pipeline ohne multithreading und eine ohne multithreading und multiprocessing schreiben und evaluieren
-
-
 _pipeline_input_queue = queue.Queue()
 _metadata_input_queue = queue.Queue()
 _saving_input_queue = queue.Queue()
@@ -86,7 +83,7 @@ def _extraction_thread(tar_dir):
     file_dict_ids = []
 
     for tar_path in tar_paths:
-        with io_pkg.targz.TarMonthExtractor(tar_path) as targz_paths:
+        with io_pkg.targz.TarExtractor(tar_path) as targz_paths:
             for path in targz_paths:
                 file_dict_ids.append(_extract.remote(path))
 

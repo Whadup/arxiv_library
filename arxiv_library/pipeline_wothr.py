@@ -42,7 +42,7 @@ def pipeline(tar_dir, json_dir):
     file_dict_ids = []
 
     for tar_path in tar_paths:
-        with io_pkg.targz.TarMonthExtractor(tar_path) as targz_paths:
+        with io_pkg.targz.TarExtractor(tar_path) as targz_paths:
             for path in targz_paths:
                 file_dict_ids.append(_extract.remote(path))
 
