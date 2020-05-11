@@ -63,7 +63,7 @@ def pipeline(tar_dir, json_dir):
                 paper_dict = extraction.equations.extract_equations(paper_dict)
                 paper_dict = extraction.citations.extract_citations(paper_dict)
 
-                paper_dict = compilation.mathml.compile_equations(paper_dict)
+                paper_dict = compilation.mathml.compile_paper(paper_dict, paper_dict['arxiv_id'])
                 paper_dict = io_pkg.metadata.recieve_meta_data([paper_dict['arxiv_id']])
 
                 _save.remote(paper_dict, json_dir)

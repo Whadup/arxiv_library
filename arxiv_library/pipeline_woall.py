@@ -1,6 +1,7 @@
 import json
 import os
 import logging
+import traceback
 import preprocessing.comments
 import preprocessing.imports
 import extraction.preamble
@@ -31,7 +32,7 @@ def pipeline(tar_dir, json_dir):
                     paper_dict = extraction.equations.extract_equations(paper_dict)
                     paper_dict = extraction.citations.extract_citations(paper_dict)
 
-                    paper_dict = compilation.mathml.compile_equations(paper_dict)
+                    paper_dict = compilation.mathml.compile_paper(paper_dict, paper_dict['arxiv_id'])
                     cache.append(paper_dict)
 
                     if len(cache) > 100:
@@ -46,3 +47,4 @@ def pipeline(tar_dir, json_dir):
 
                 except Exception as exception:
                     logging.warning(exception)
+                    traceback.print_exc()

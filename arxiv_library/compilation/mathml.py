@@ -15,39 +15,40 @@ def_re = re.compile(r"(\\def\s?\\(\w|\s)*)(\[#1\])")
 EXPERIMENTAL = False 
 
 # Macros that often cause problems, but have no semantic efect for the formula, are redefiened so that they do nothing.
-PREAMBLE_HOTFIX = [r"\newcommand{\label}[1]{}",
-                      r"\def \let {\def}",
-                      r"\newcommand{\mbox}[1]{\text{#1}}",
-                      r"\newcommand{\sbox}[1]{\text{#1}}",
-                      r"\newcommand{\hbox}[1]{\text{#1}}",
-                      r"\newcommand{\nonumber}{}",
-                      r"\newcommand{\notag}{}",
-                      r"\newcommand{\value}[1]{#1}",
-                      r"\newcommand{\todo}{}",
-                      r"\def{\cal}{\mathcal}",
-                      r"\def{\mathds}{\mathbb}",
-                      r"\def{\mathbbm}{\mathbb}",
-                      r"\newcommand{\scalebox}[1]{#1}",
-                      r"\newcommand{\vspace}[1]{}",
-                      r"\newcommand{\ensuremath}{}",
-                      r"\newcommand{\hfill}{}",
-                      r"\newcommand{\footnote}[1]{}",
-                      r"\newcommand{\footnotemark}[1]{}",
-                      r"\newcommand{\marginpar}[1]{}",
-                      r"\newcommand{\xspace}{}",
-                      r"\newcommand{\norm}[1]{\lVert #1 \rVert}",
-                      r"\newcommand{\lefteqn}[1]{#1}",
-                      r"\newcommand{\textsc}[1]{\text{#1}}",
-                      r"\newcommand{\newtheorem}[2]{}",
-                      r"\newcommand{\par}{ \\ }",
-                      r"\newcommand{\vskip}{}",
-                      r"\newcommand{\baselineskip}{}",
-                      r"\newcommand{\textsuperscript}[1]{^{#1}}",
-                      r"\newcommand{\title}[1]{}",
-                      r"\newcommand{\author}[1]{}",
-                      r"\newcommand{\makeatother}{}",
-                      r"\newcommand{\E}{\mathbb{E}}"
-                  ]
+PREAMBLE_HOTFIX = [
+    r"\newcommand{\label}[1]{}",
+    r"\def \let {\def}",
+    r"\newcommand{\mbox}[1]{\text{#1}}",
+    r"\newcommand{\sbox}[1]{\text{#1}}",
+    r"\newcommand{\hbox}[1]{\text{#1}}",
+    r"\newcommand{\nonumber}{}",
+    r"\newcommand{\notag}{}",
+    r"\newcommand{\value}[1]{#1}",
+    r"\newcommand{\todo}{}",
+    r"\def{\cal}{\mathcal}",
+    r"\def{\mathds}{\mathbb}",
+    r"\def{\mathbbm}{\mathbb}",
+    r"\newcommand{\scalebox}[1]{#1}",
+    r"\newcommand{\vspace}[1]{}",
+    r"\newcommand{\ensuremath}{}",
+    r"\newcommand{\hfill}{}",
+    r"\newcommand{\footnote}[1]{}",
+    r"\newcommand{\footnotemark}[1]{}",
+    r"\newcommand{\marginpar}[1]{}",
+    r"\newcommand{\xspace}{}",
+    r"\newcommand{\norm}[1]{\lVert #1 \rVert}",
+    r"\newcommand{\lefteqn}[1]{#1}",
+    r"\newcommand{\textsc}[1]{\text{#1}}",
+    r"\newcommand{\newtheorem}[2]{}",
+    r"\newcommand{\par}{ \\ }",
+    r"\newcommand{\vskip}{}",
+    r"\newcommand{\baselineskip}{}",
+    r"\newcommand{\textsuperscript}[1]{^{#1}}",
+    r"\newcommand{\title}[1]{}",
+    r"\newcommand{\author}[1]{}",
+    r"\newcommand{\makeatother}{}",
+    r"\newcommand{\E}{\mathbb{E}}"
+]
 
 PREAMBLE_SUBS  = {
         r"\boldmath" : r"\bf",
@@ -69,6 +70,7 @@ def format_def(preamble_entry):
     else:
         return preamble_entry
 
+
 def substitute_from_dict(preamble_entry, sub_dict):
     for key, value in sub_dict.items():
         preamble_entry = preamble_entry.replace(key, value)
@@ -79,38 +81,49 @@ def substitute_from_dict(preamble_entry, sub_dict):
     return preamble_entry
 
 
-def compile_one_eq(eq, preamble, paper_id):
-    """Compiles a single equation given as eq and preamble"""
-    job_no = eq['no']
-    mathml_file_name = str(job_no) + ".kmathml"
-    latex = eq["latex"]
-    latex = substitute_from_dict(latex, LATEX_SUBS)
-    # The eq might be a tabbed multiline equation with (&s and \\s).
-    # To handle this we surround the formula with the aligned env. This env is supported by katex.
-    latex = preamble + "\n" + r"\begin{aligned}" + latex + r"\end{aligned}"
-    latex = latex.replace("\\newcommand*", "\\newcommand")
+def prepare_js_json(paper_dict):
+    preamble = paper_dict['preamble']
+    preamble_lines = clean_preamble(preamble)
+    paper_dict["preamble"] = preamble_lines
+    paper_dict["preamble"] = paper_dict["preamble"].replace("\\newcommand*", "\\newcommand") # TODO: why?
+    for sec in paper_dict["sections"]:
+        for eq in sec["equations"]:
+            # eq['latex'] = substitute_from_dict(eq["latex"], LATEX_SUBS)
+            # if '&' in eq or r'\n' in repr(eq):
+            #     eq["latex"] = r"\begin{aligned}" + eq['latex'] + r"\end{aligned}"
+            eq['latex'] = r"\begin{aligned}" + substitute_from_dict(eq["latex"], LATEX_SUBS) + r"\end{aligned}"
+    return paper_dict
+
+
+def call_js(paper_dict, paper_id=""):
     try:
         # if this runs with shell-escape somehow the nonstopmode is deactivated
         # maybe work with a timeout argument for run function.
         p, _ = os.path.split(__file__)
-        result = subprocess.run(["js/tex2mathml.js",
-                                latex 
-                                ],
-                                cwd=os.path.join(p),
-                                universal_newlines=True,
-                                text=True,
-                                capture_output=True,
-                                timeout=120)
-        if result.returncode != 0:
-            logging.error("Non-zero returncode for eq no. {} in paper {}: \n\t".format(job_no, paper_id) +\
-                    result.stderr) 
-            return False
-        else:
-            eq["mathml"] = annotation_re.sub('', result.stdout)
-            return True
+        # print(dict(preamble=preamble, latex_equations=latex_equations))
+        result = subprocess.run(
+            ["js/tex2mathml.js"],
+            input=json.dumps(
+                # dict(preamble=preamble, latex_equations=latex_equations)
+                paper_dict
+            ),
+            cwd=os.path.join(p),
+            universal_newlines=True,
+            text=True,
+            capture_output=True,
+            timeout=120
+        )
+        if result.stderr:
+            logging.warning(result.stderr)
+        # print(result.stdout)
+        # print(result.stderr)
+        result = json.loads(result.stdout)
+        result["preamble"] = result["preamble"].split("\n")
+        return result
     except subprocess.TimeoutExpired:
-        logging.warning("Timeout for eq no. {} in paper {}: \n".format(job_no, paper_id) + "\n")
+        logging.warning("Timeout for paper {}: \n".format(paper_id) + "\n")
         return False
+
 
 def clean_preamble(preamble):
     preamble = [substitute_from_dict(preamble_entry, PREAMBLE_SUBS) for preamble_entry in preamble]
@@ -118,32 +131,33 @@ def clean_preamble(preamble):
     preamble_lines = "\n".join(full_preamble)
     return preamble_lines
 
-def compile_eqs_in_paper(extracted_eqs_file):
+
+def compile_paper(paper_dict, paper_id="<string>"):
     """Compile all formulas from one arxiv-paper
-    :param extracted_eqs_file: Path to file where all the formulas
     and the necessary packages/macros are stored."""
-    paper_dict = None
-    paper_id = os.path.basename(extracted_eqs_file).replace(".json", "")
-    with open(extracted_eqs_file, 'r') as f:
-                paper_dict = json.load(f)
-
-                preamble = paper_dict['preamble']
-                preamble_lines = clean_preamble(preamble)
-
-                sections = paper_dict['sections']
-                for section in sections:
-                    eqs = section["equations"]
-                    for eq in eqs:
-                        compile_one_eq(eq, preamble_lines, paper_id)
-
-    with open(extracted_eqs_file, 'w') as f:
-        json.dump(paper_dict, f, indent=4, sort_keys=True)
-
-
-def compile_equations(paper_dict):
-    paper_dict['mathml'] = []
-
-    for equation in paper_dict['equations']:
-        paper_dict['mathml'].append(compile_one_eq(equation, paper_dict['preamble'], paper_dict['arxiv_id']))
-
+    paper_dict = prepare_js_json(paper_dict)
+    paper_dict = call_js(paper_dict, paper_id=paper_id)
     return paper_dict
+
+
+def compile_string(latex):
+    """Use the same compilation pipeline to compile a string"""
+    paper_dict = {
+        "preamble": [],
+        "sections" : [{"equations": [{"latex": latex, "no": 0}]}]
+    }
+    paper_dict = compile_paper(paper_dict)
+    print(paper_dict)
+    mml = paper_dict["sections"][0]["equations"][0].get("mathml", None)
+    if mml:
+        return annotation_re.sub("", mml)
+    return None
+
+
+if __name__ == "__main__":
+    FILE_PATH = "/mathml/1703.08475.json"
+    PAPER_ID = os.path.basename(FILE_PATH).replace(".json", "")
+    with open(FILE_PATH, 'r') as f:
+        P = json.load(f)
+        print(compile_paper(P, PAPER_ID))
+    print(compile_string("f(x) = x^2"))

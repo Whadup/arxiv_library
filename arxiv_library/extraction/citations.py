@@ -51,5 +51,5 @@ def extract_citations(paper_dict):
         if match is not None:
             bib_ids.add(match.group(0))
 
-    paper_dict['citations'] = bib_ids
+    paper_dict['citations'] = list(bib_ids)
     return paper_dict

@@ -15,11 +15,17 @@ _latex_environments = [
 
 
 def extract_equations(paper_dict):
-    paper_dict['equations'] = []
+    count = 0
 
-    for index, section in paper_dict['sections'].items():
+    for section in paper_dict['sections']:
         for env in _latex_environments:
-            for match in re.finditer(env, section):
-                paper_dict['equations'].append(match.groups()[-1])  # skip [..]
+            for match in re.finditer(env, section['latex']):
+                section['equations'].append({
+                    'no': count,
+                    'latex': match.groups()[-1],
+                    'mathml': ''
+                })
+
+                count += 1
 
     return paper_dict

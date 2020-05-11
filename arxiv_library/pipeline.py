@@ -48,7 +48,7 @@ def _pipe(file_dict_id):
         paper_dict = extraction.equations.extract_equations(paper_dict)
         paper_dict = extraction.citations.extract_citations(paper_dict)
 
-        paper_dict = compilation.mathml.compile_equations(paper_dict)
+        paper_dict = compilation.mathml.compile_paper(paper_dict, paper_dict['arxiv_id'])
 
         return paper_dict
 
