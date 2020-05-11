@@ -47,8 +47,7 @@ def pipeline(tar_dir, json_dir):
                     cache.append(paper_dict)
 
                     if len(cache) > 100:
-                        arxiv_ids = [pd['arxiv_id'] for pd in cache]
-                        paper_dicts = io_pkg.metadata.receive_meta_data(arxiv_ids)
+                        paper_dicts = io_pkg.metadata.receive_meta_data(paper_dicts)
 
                         for pd in paper_dicts:
                             with open(os.path.join(json_dir, '{}.json'.format(paper_dict['arxiv_id'])), 'w') as file:
@@ -61,6 +60,6 @@ def pipeline(tar_dir, json_dir):
                     traceback.print_exc()
                     failed += 1
 
-    logging.debug('FAILED ON MATHML COMPILATION: {}'.format(failed_on_compile))
-    logging.debug('FAILED TOTAL: {}'.format(failed))
-    logging.debug('PAPERS TOTAL: {}'.format(count))
+    logging.warning('FAILED ON MATHML COMPILATION: {}'.format(failed_on_compile))
+    logging.warning('FAILED TOTAL: {}'.format(failed))
+    logging.warning('PAPERS TOTAL: {}'.format(count))

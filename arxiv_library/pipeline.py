@@ -59,8 +59,7 @@ def _pipe(file_dict_id):
 @ray.remote
 def _metadata(paper_dict_ids):
     try:
-        arxiv_ids = [paper_dict_id['arxiv_id'] for paper_dict_id in paper_dict_ids]
-        papers = io_pkg.metadata.receive_meta_data(arxiv_ids)
+        papers = io_pkg.metadata.receive_meta_data(paper_dict_ids)
 
     except Exception as exception:
         logging.warning(exception)
