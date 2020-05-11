@@ -3,7 +3,7 @@ import pipeline_woall
 import pipeline_wothr
 import io_pkg.paths
 
-logging.basicConfig(filename='/home/jan/arxiv_lib/pipeline.log')
+logging.basicConfig(filename='/home/jan/arxiv_lib/pipeline.log', filemode='w')
 
 io_pkg.paths.set_path('json_location', '/home/jan/arxiv_lib/json')
 io_pkg.paths.set_path('tar_location', '/home/jan/arxiv_lib/tars')
