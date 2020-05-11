@@ -72,7 +72,7 @@ def _save(paper_dict_id, json_dir):
         paper_dict = ray.get(paper_dict_id)
 
         with open(os.path.join(json_dir, '{}.json'.format(paper_dict['arxiv_id'])), 'w') as file:
-            json.dump(paper_dict, file)
+            json.dump(paper_dict, file, indent=4)
 
     except Exception as exception:
         logging.warning(exception)

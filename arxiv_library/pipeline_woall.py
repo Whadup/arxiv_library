@@ -20,10 +20,13 @@ def pipeline(tar_dir, json_dir):
 
     failed_on_compile = 0
     failed = 0
+    count = 0
 
     for tar_path in (os.path.join(tar_dir, p) for p in tar_paths):
         with io_pkg.targz.TarExtractor(tar_path) as paths:
             for path in paths:
+                count += 1
+
                 try:
                     file_dict = io_pkg.targz.gz_to_file_dict(path)
 
@@ -39,6 +42,7 @@ def pipeline(tar_dir, json_dir):
                         paper_dict = compilation.mathml.compile_paper(paper_dict, paper_dict['arxiv_id'])
                     except:
                         failed_on_compile += 1
+                        raise ValueError()
 
                     cache.append(paper_dict)
 
@@ -48,7 +52,7 @@ def pipeline(tar_dir, json_dir):
 
                         for pd in paper_dicts:
                             with open(os.path.join(json_dir, '{}.json'.format(paper_dict['arxiv_id'])), 'w') as file:
-                                json.dump(pd, file)
+                                json.dump(pd, file, indent=4)
 
                         cache = []
 
@@ -57,5 +61,6 @@ def pipeline(tar_dir, json_dir):
                     traceback.print_exc()
                     failed += 1
 
-    print(failed_on_compile)
-    print(failed)
+    logging.debug('FAILED ON MATHML COMPILATION: {}'.format(failed_on_compile))
+    logging.debug('FAILED TOTAL: {}'.format(failed))
+    logging.debug('PAPERS TOTAL: {}'.format(count))
