@@ -33,7 +33,7 @@ class TarExtractor:
         paths = [os.path.join(self.tmp_tar, name) for name in names[1:]]
         return paths
 
-    def __exit__(self, type, value, traceback):
+    def __exit__(self, exc_type, value, traceback):
         shutil.rmtree(self.subdir)
 
 
