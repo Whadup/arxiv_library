@@ -33,7 +33,7 @@ def _resolve_imports(path, file_dict, depth=3):
             matched_path = match.group('path')
 
             if match.group('folder'):
-                matched_path = os.path.join(match.group('prefix'), matched_path)
+                matched_path = os.path.join(match.group('folder'), matched_path)
 
             # TODO Gibt es hier eine bessere Lösung? Ist das zwangsweise eine tex file?
 
