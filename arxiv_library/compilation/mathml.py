@@ -143,8 +143,6 @@ def compile_eqs_in_paper(extracted_eqs_file):
 def compile_equations(paper_dict):
     paper_dict['mathml'] = []
 
-    print(paper_dict)
-
     for equation in paper_dict['equations']:
         paper_dict['mathml'].append(compile_one_eq(equation, paper_dict['preamble'], paper_dict['arxiv_id']))
 
