@@ -19,7 +19,7 @@ def pipeline(tar_dir, json_dir):
     cache = []
 
     failed_on_compile = 0
-    failed_not_on_compile = 0
+    failed = 0
 
     for tar_path in (os.path.join(tar_dir, p) for p in tar_paths):
         with io_pkg.targz.TarExtractor(tar_path) as paths:
@@ -43,7 +43,7 @@ def pipeline(tar_dir, json_dir):
                     cache.append(paper_dict)
 
                     if len(cache) > 100:
-                        arxiv_ids = [pd['arxiv_id'] for pd in paper_dicts]
+                        arxiv_ids = [pd['arxiv_id'] for pd in cache]
                         paper_dicts = io_pkg.metadata.receive_meta_data(arxiv_ids)
 
                         for pd in paper_dicts:
@@ -55,3 +55,7 @@ def pipeline(tar_dir, json_dir):
                 except Exception as exception:
                     logging.warning(exception)
                     traceback.print_exc()
+                    failed += 1
+
+    print(failed_on_compile)
+    print(failed)
