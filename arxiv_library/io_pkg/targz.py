@@ -13,7 +13,7 @@ from chardet.universaldetector import UniversalDetector
 single_gz_re = re.compile(r"was \".*?\"")
 
 
-class TarMonthExtractor():
+class TarExtractor:
     """
     Can be used with the ```with obj as p``` syntax. obj is a object of this class and p are the paths to the gzs
     that we extract with the __enter__ method.
@@ -41,45 +41,13 @@ def gz_to_file_dict(gz_path):
     if gz_path.endswith(".pdf"):
         return {}
     elif gz_path.endswith(".gz"):
-        file_dict = process_paper_gz(gz_path)
+        file_dict = _process_paper_gz(gz_path)
         return file_dict
     else:
         logging.warning("Unknown file ending: {}".format(gz_path))
 
 
-def extract_arxiv_month(tar_archive):  # TODO darf man diese funktion noch benutzen? wenn nicht privat machen, ich finde hier keine arxiv_ids im paper dict
-    """ 
-    The tars are organised monthwise. E. g. the tar archive arXiv_src_0305_001.tar
-    contains all papers of May 2003. In this tar archive is a (tar).gz for every paper.
-    This function takes a path to a tar archive and returns its content as a list of file_dicts.
-    One file_dict per paper. 
-    The arg tmp_dir gives a directory where the tar_archive can be temporarally extracted to.
-    """
-    tar = tarfile.open(tar_archive, mode="r")
-    tar.extractall(path_config.get_path("tmp_tar"))
-
-    # get subdir to that tar was extracted
-    names = tar.getnames()
-    subdir = os.path.join(path_config.get_path("tmp_tar"), names[0])
-
-    file_dicts = []
-
-    for paper_gz in os.listdir(subdir):
-
-        if paper_gz.endswith(".pdf"):
-            continue
-        elif paper_gz.endswith(".gz"):
-            gz_path = os.path.join(subdir, paper_gz)
-            file_dict = process_paper_gz(gz_path)
-            file_dicts.append(file_dict)
-        else:
-            logging.warning("Unknown file ending: {}".format(paper_gz))
-
-    shutil.rmtree(subdir)
-    return file_dicts
-
-
-def process_paper_gz(gz_path):
+def _process_paper_gz(gz_path):
     """Extract a (tar).gz-file of a paper and return it as a file_dict."""
     paper_gz = os.path.basename(gz_path)
     file_dict = {"arxiv_id": paper_gz.replace(".gz", "")}
@@ -95,7 +63,7 @@ def process_paper_gz(gz_path):
         # extract and decode it
         with gzip.open(gz_path, "rb") as gf:
             raw_bytes = gf.read()
-            decode_n_store(raw_bytes, file_dict, "main.tex", gz_path)
+            _decode_n_store(raw_bytes, file_dict, "main.tex", gz_path)
     # it is actually a tar.gz...
     else:
         try:
@@ -111,14 +79,14 @@ def process_paper_gz(gz_path):
                     continue
                 gz_buffer = tar_gz.extractfile(gz_name)
                 raw_bytes = gz_buffer.read()
-                decode_n_store(raw_bytes, file_dict, gz_name, gz_path)
+                _decode_n_store(raw_bytes, file_dict, gz_name, gz_path)
         except tarfile.ReadError:
             logging.error("Could not read tar: {}".format(paper_gz))
 
     return file_dict
 
 
-def decode_n_store(raw_bytes, file_dict, file_path, paper):
+def _decode_n_store(raw_bytes, file_dict, file_path, paper):
     """
     Try to detect the encoding of the byte_string (raw_bytes), encode it respectively,
     and put the resulting string into the file_dict with file_path as key.

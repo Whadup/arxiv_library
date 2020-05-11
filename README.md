@@ -6,8 +6,8 @@
 You may retrieve all file_dicts for a tar archive with all papers from one month like this:
 
 ```python
-from io_pkg.targz import TarMonthExtractor, gz_to_file_dict
-tar = TarMonthExtractor("path/to/tar_archive")
+from io_pkg.targz import TarExtractor, gz_to_file_dict
+tar = TarExtractor("path/to/tar_archive")
 with tar as paths:
     for path in paths:
         file_dict = gz_to_file_dict(path)
