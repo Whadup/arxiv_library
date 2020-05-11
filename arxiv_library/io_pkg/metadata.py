@@ -27,10 +27,10 @@ def id_from_filename(filename):
     return '/'.join(["".join(x) for _, x in itertools.groupby(filename, key=str.isdigit)])
 
 
-def receive_meta_data(arxiv_ids, folder=None, overwrite=False, chunk_size=100):
-    results = []
-    # split arxiv_ids into a list of chunks with len of chunk_size
+def receive_meta_data(paper_dicts, chunk_size=100):
+    arxiv_ids = [paper_dict['arxiv_id'] for paper_dict in paper_dicts]
     chunk_generator = (arxiv_ids[i:i+chunk_size] for i in range(0, len(arxiv_ids), chunk_size))
+
     for chunk in chunk_generator:
         response = arxiv.query(id_list=chunk)
 
@@ -41,32 +41,9 @@ def receive_meta_data(arxiv_ids, folder=None, overwrite=False, chunk_size=100):
             paper_id = paper["id"].split("abs/")[1].replace("/", "")
             paper_id = _paper_version_tag.sub("", paper_id)
 
-            results.append(paper)
+            for paper_dict in paper_dicts:
+                if paper_id == paper_dict['arxiv_id']:
+                    paper_dict['metadata'] = {}.update(paper)
+                    break
 
-            # if no folder is given we don't save the results and just return the responses
-
-            if not folder:
-                continue
-
-            paper_path = os.path.join(folder, paper_id + ".json")
-
-            # Since we fetch meta_data for all papers for that we have json files, there should be json file for the
-            # id that we extracted from the response
-
-            if not os.path.isfile(paper_path):
-                raise ValueError('Could not find paper file {} when trying to recieve meta data.'.format(paper_path))
-
-            with open(paper_path, 'r') as file:
-                paper_dict = json.load(file)
-
-            stored_id = paper_dict.get('id', None)
-
-            if stored_id is not None and not overwrite:
-                logging.info('The file {} already exists. Overwrite option is off.'.format(paper_path))
-                continue
-
-            with open(paper_path, 'w') as file:
-                paper_dict.update(paper)
-                json.dump(paper_dict, file, indent=4, sort_keys=True)
-
-    return results
+    return paper_dicts
