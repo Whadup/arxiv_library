@@ -68,7 +68,7 @@ def pipeline(tar_dir, json_dir):
 
     for tar_path in (os.path.join(tar_dir, p) for p in tar_paths):
         targzs = io_pkg.targz.process_tar(tar_path)
-        chunk_size = len(targzs) // (psutil.cpu_count() - 1)
+        chunk_size = len(targzs) // (psutil.cpu_count() // 2)
 
         file_dict_chunk_ids = []
 
