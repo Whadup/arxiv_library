@@ -14,7 +14,7 @@ single_gz_re = re.compile(r"was \".*?\"")
 def process_tar(archive_path):
     tar = tarfile.open(archive_path, mode='r')
     members = tar.getmembers()
-    compressed_fd = lambda m: {"compressed": tar.extractfile(m), "arxiv_id": os.path.basename(m.name).replace(".gz", "") }
+    compressed_fd = lambda m: {"compressed": tar.extractfile(m), "arxiv_id": os.path.basename(m.name).replace(".gz", "")}
     return (compressed_fd(member) for member in members[1:] if ".pdf" not in member.name)
 
 
@@ -25,22 +25,33 @@ def process_gz(file_dict):
     member_buffer.seek(0)
     file_type = magic.from_buffer(member_bytes)
     match = single_gz_re.search(file_type)
-    if not match:
-        tar_gz = tarfile.open(fileobj=member_buffer, mode="r")
-        gz_names = tar_gz.getnames()
-
-        # Extract every "tex" or "bbl" member of the tar archive
-        for gz_name in gz_names:
-            # NICETOHAVE do we need other files?
-            if not gz_name.endswith(".tex") and not gz_name.endswith(".bbl"):
-                continue
-            gz_buffer = tar_gz.extractfile(gz_name)
-            raw_bytes = gz_buffer.read()
-            _decode_n_store(raw_bytes, file_dict, gz_name, file_dict["arxiv_id"])
+    if match:
+        if ".tex" in file_type:
+            decompressed = gzip.decompress(member_bytes)
+            _decode_n_store(decompressed, file_dict, "main.tex", file_dict["arxiv_id"])
+        elif ".tar" in file_type:
+            _extract_n_store(member_buffer, file_dict)
+        else:
+            logging.warning("The file command detected an unknown file type: " + file_type)
     else:
-        decompressed = gzip.decompress(member_bytes)
-        _decode_n_store(decompressed, file_dict, "main.tex", file_dict["arxiv_id"])
+        _extract_n_store(member_buffer, file_dict)
+
+    if len(file_dict.keys()) <= 1:
+        raise ValueError("File dict for {} is empty.".format(file_dict["arxiv_id"]))
+
     return file_dict
+
+
+def _extract_n_store(member_buffer, file_dict):
+    tar_gz = tarfile.open(fileobj=member_buffer, mode="r")
+    gz_names = tar_gz.getnames()
+    for gz_name in gz_names:
+        # NICETOHAVE do we need other files?
+        if not gz_name.endswith(".tex") and not gz_name.endswith(".bbl"):
+            continue
+        gz_buffer = tar_gz.extractfile(gz_name)
+        raw_bytes = gz_buffer.read()
+        _decode_n_store(raw_bytes, file_dict, gz_name, file_dict["arxiv_id"])
 
 
 def _decode_n_store(raw_bytes, file_dict, file_path, paper):
