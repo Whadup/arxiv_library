@@ -69,7 +69,6 @@ def pipeline(tar_dir, json_dir):
 
             except Exception as exception:
                 logging.warning(exception)
-                traceback.print_exc()
                 failed_critical += 1
 
     if debug:

@@ -15,9 +15,9 @@ import compilation.mathml
 
 
 @ray.remote
-def _extract(tar_path):
+def _extract(targz):
     try:
-        return io_pkg.targz.gz_to_file_dict(tar_path)
+        return io_pkg.targz.process_gz(targz)
 
     except Exception as exception:
         logging.warning(exception)
@@ -42,9 +42,8 @@ def pipeline(tar_dir, json_dir):
     file_dict_ids = []
 
     for tar_path in (os.path.join(tar_dir, p) for p in tar_paths):
-        with io_pkg.targz.TarExtractor(tar_path) as targz_paths:
-            for path in targz_paths:
-                file_dict_ids.append(_extract.remote(path))
+        for targz in io_pkg.targz.process_tar(tar_path):
+            file_dict_ids.append(_extract.remote(targz))
 
     remaining_file_dict_ids = True
 
