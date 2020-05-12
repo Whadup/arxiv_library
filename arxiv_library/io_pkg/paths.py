@@ -2,7 +2,7 @@ import json
 import os
 
 
-configuarable_paths = ["json_location", "tar_location",  "file_dict_location"]
+configuarable_paths = ["json_location", "tar_location",  "file_dict_location", "log_path"]
 
 config_json_path = "io_pkg/path_config.json"
 
