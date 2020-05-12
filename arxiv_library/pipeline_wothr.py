@@ -2,6 +2,7 @@ import ray
 import json
 import os
 import logging
+import traceback
 import io_pkg.targz
 import io_pkg.metadata
 import io_pkg.paths
@@ -24,10 +25,8 @@ def _extract(targz):
 
 
 @ray.remote
-def _save(paper_dict_id, json_dir):
+def _save(paper_dict, json_dir):
     try:
-        paper_dict = ray.get(paper_dict_id)
-
         with open(os.path.join(json_dir, '{}.json'.format(paper_dict['arxiv_id'])), 'w') as file:
             json.dump(paper_dict, file, indent=4)
 
@@ -40,6 +39,7 @@ def pipeline(tar_dir, json_dir):
 
     tar_paths = os.listdir(tar_dir)
     file_dict_ids = []
+    cache = []
 
     for tar_path in (os.path.join(tar_dir, p) for p in tar_paths):
         for targz in io_pkg.targz.process_tar(tar_path):
@@ -63,9 +63,14 @@ def pipeline(tar_dir, json_dir):
                 paper_dict = extraction.citations.extract_citations(paper_dict)
 
                 paper_dict = compilation.mathml.compile_paper(paper_dict, paper_dict['arxiv_id'])
-                paper_dict = io_pkg.metadata.receive_meta_data([paper_dict])
 
-                _save.remote(paper_dict, json_dir)
+                cache.append(paper_dict)
+
+                if len(cache) > 100 or not remaining_file_dict_ids:
+                    paper_dicts = io_pkg.metadata.receive_meta_data(cache)
+
+                    for pd in paper_dicts:
+                        _save.remote(pd, json_dir)
 
             except Exception as exception:
                 logging.warning(exception)

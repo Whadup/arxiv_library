@@ -27,7 +27,9 @@ def pipeline(tar_dir, json_dir):
     paper_total = 0
 
     for tar_path in (os.path.join(tar_dir, p) for p in tar_paths):
-        for targz in io_pkg.targz.process_tar(tar_path):
+        targzs = io_pkg.targz.process_tar(tar_path)
+
+        for i, targz in enumerate(targzs):
             paper_total += 1
 
             try:
@@ -53,7 +55,7 @@ def pipeline(tar_dir, json_dir):
 
                 cache.append(paper_dict)
 
-                if len(cache) > 100:
+                if len(cache) > 100 or i == len(targzs) - 1:
                     paper_dicts = io_pkg.metadata.receive_meta_data(cache)
 
                     if debug:
