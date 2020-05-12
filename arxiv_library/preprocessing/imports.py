@@ -19,9 +19,6 @@ def resolve_imports(file_dict):
                 except Exception as exception:
                     raise exception
 
-    if len(file_dict.items()) == 0:
-        raise ValueError('File dict was empty.')
-
     raise ValueError('Did not find file with \\begin{{document}} in file dict.')
 
 

@@ -4,6 +4,7 @@ import os
 import threading
 import queue
 import logging
+import traceback
 import io_pkg.targz
 import io_pkg.metadata
 import io_pkg.paths
@@ -32,15 +33,13 @@ def _extract(targz):
 
     except Exception as exception:
         logging.warning(exception)
+        traceback.print_exc()
 
 
 @ray.remote
 def _pipe(file_dict_id):
     try:
-        # file_dict = ray.get(file_dict_id)  # TODO muss ich das hier getten oder nicht?
-        file_dict = file_dict_id
-
-        file_dict = preprocessing.comments.remove_comments(file_dict)
+        file_dict = preprocessing.comments.remove_comments(file_dict_id)
         paper_dict = preprocessing.imports.resolve_imports(file_dict)
 
         paper_dict = extraction.preamble.extract_preamble(paper_dict)
@@ -54,6 +53,7 @@ def _pipe(file_dict_id):
 
     except Exception as exception:
         logging.warning(exception)
+        traceback.print_exc()
 
 
 @ray.remote
@@ -63,6 +63,7 @@ def _metadata(paper_dict_ids):
 
     except Exception as exception:
         logging.warning(exception)
+        traceback.print_exc()
 
 
 @ray.remote
@@ -75,6 +76,7 @@ def _save(paper_dict_id, json_dir):
 
     except Exception as exception:
         logging.warning(exception)
+        traceback.print_exc()
 
 
 def _extraction_thread(tar_dir):
@@ -89,6 +91,11 @@ def _extraction_thread(tar_dir):
 
     while remaining_file_dict_ids:
         ready_file_dict_ids, remaining_file_dict_ids = ray.wait(file_dict_ids, num_returns=1)  # TODO ueberschreibt das die ready ids?
+
+        print(len(ready_file_dict_ids))
+        test = ray.get(ready_file_dict_ids[0])
+        print(type(test))
+        return
 
         for id in ready_file_dict_ids:
             _pipeline_input_queue.put(id)
