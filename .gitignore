@@ -6,3 +6,6 @@ arxiv_library.egg-info/
 venv/*
 arxiv_library/io_pkg/path_config.json
 test/src_tar_test*
+arxiv_library/pipeline.log
+arxiv_library/my_test.py
+arxiv_library/1tar.py
