@@ -21,7 +21,7 @@ encodings = ['utf-8', 'iso8859_1', 'cp1252', 'cp1251', 'shift_jis']
 # 'gzip compressed data, was "9301220.tar", last modified: Thu Nov 25 19:34:37 1999, max compression, from Unix'
 # the latter is common for older archives.
 # So, we detect different types with these RegEx's:
-single_gz_re = re.compile(r"was \".*?\.tex\"")
+single_gz_re = re.compile(r"was \".*?\.tex\"", re.IGNORECASE)
 tar_gz_re = re.compile(r"(was \".*?\.tar\")|(gzip compressed data, last modified:)")
 
 
