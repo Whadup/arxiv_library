@@ -6,15 +6,12 @@
 You may retrieve all file_dicts for a tar archive with all papers from one month like this:
 
 ```python
-from io_pkg.targz import TarExtractor, gz_to_file_dict
-tar = TarExtractor("path/to/tar_archive")
-with tar as paths:
-    for path in paths:
-        file_dict = gz_to_file_dict(path)
-        # do something with the file dict
-``` 
-The _with-syntax_ will automatically cleanup all files that were temporarily extracted on disk.
+from io_pkg.targz import process_gz, process_tar 
 
+for compressed_file_dict in process_tar("path/to/tar_archive"):
+    file_dict = process_gz(compressed_file_dict)
+    # do something with the file dict
+``` 
 
 #### tex-extraction
 With the tex-extraction process we want extract the formulas from a paper. The paper is provided as a filedict.
@@ -79,7 +76,7 @@ Pipeline modules:
 -----------------------
 **filedict**: dict() of files in a paper directory with {relative path: filestring}
 
-**paperdict**: dict() with keys [paper, preamble, sections, equations, citations, metadata] for a single paper
+**paperdict**: dict() with keys [paper, preamble, sections,  citations, metadata] for a single paper
 
 ## Dependencies
 For a list of required packages you may take a look at [setup.py](setup.py).
