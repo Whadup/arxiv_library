@@ -33,7 +33,7 @@ def process_tar(archive_path):
     members = tar.getmembers()
     compressed_fd = lambda m: dict(compressed=tar.extractfile(m).read(),
                                    arxiv_id=os.path.basename(m.name).replace(".gz", ""))
-    return (compressed_fd(member) for member in members[1:] if ".pdf" not in member.name)
+    return [compressed_fd(member) for member in members[1:] if ".pdf" not in member.name]
 
 
 def process_gz(file_dict):
