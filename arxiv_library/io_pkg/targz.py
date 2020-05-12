@@ -5,6 +5,7 @@ import os
 import logging
 import re
 from chardet.universaldetector import UniversalDetector
+from io import BytesIO
 
 # A extracted monthly-tar contains files with the endings ".gz" or ".pdf".
 # We don't care for ".pdf".
@@ -26,11 +27,12 @@ def process_tar(archive_path):
     """
     Take a path to a tar archive (archive_path) that contains all arXiv-papers from one month.
     Extract all members, omit the pdf members and for the remaining members:
-    create a file_dict with the arxiv_id and a buffered reader for the content of the member.
+    create a file_dict with the arxiv_id and the bytes of the member.
     """
     tar = tarfile.open(archive_path, mode='r')
     members = tar.getmembers()
-    compressed_fd = lambda m: dict(compressed=tar.extractfile(m), arxiv_id=os.path.basename(m.name).replace(".gz", ""))
+    compressed_fd = lambda m: dict(compressed=tar.extractfile(m).read(),
+                                   arxiv_id=os.path.basename(m.name).replace(".gz", ""))
     return (compressed_fd(member) for member in members[1:] if ".pdf" not in member.name)
 
 
@@ -40,10 +42,10 @@ def process_gz(file_dict):
     Determine which type of ".gz"-file is in the "compressed" entry of the file_dict.
     Extract/decompress/decode the file(s) in the "gz" and store them to the file dict.
     """
-    member_buffer = file_dict["compressed"]
+    member_bytes = file_dict["compressed"]
+    # tarfile.open() cannot deal with bytes, therefore we recreate a buffered reader.
+    member_buffer = BytesIO(member_bytes)
     del file_dict["compressed"]
-    member_bytes = member_buffer.read()
-    member_buffer.seek(0)
     file_type = magic.from_buffer(member_bytes)
     gz_match = single_gz_re.search(file_type)
     tar_gz_match = tar_gz_re.search(file_type)
