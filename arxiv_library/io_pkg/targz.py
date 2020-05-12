@@ -7,6 +7,8 @@ import re
 from chardet.universaldetector import UniversalDetector
 from io import BytesIO
 
+encodings = ['utf-8', 'iso8859_1', 'cp1252', 'cp1251', 'shift_jis']
+
 # A extracted monthly-tar contains files with the endings ".gz" or ".pdf".
 # We don't care for ".pdf".
 # A ".gz" file can actually contain two different things: A single gzip compressed tex-file or another tar.gz archive.
@@ -51,7 +53,7 @@ def process_gz(file_dict):
     tar_gz_match = tar_gz_re.search(file_type)
     if gz_match:
         decompressed = gzip.decompress(member_bytes)
-        _decode_n_store(decompressed, file_dict, "main.tex", file_dict["arxiv_id"])
+        _decode_n_store(decompressed, file_dict, "main.tex")
     elif tar_gz_match:
         _extract_tar_gz(member_buffer, file_dict)
     else:
@@ -76,28 +78,23 @@ def _extract_tar_gz(member_buffer, file_dict):
             continue
         gz_buffer = tar_gz.extractfile(gz_name)
         raw_bytes = gz_buffer.read()
-        _decode_n_store(raw_bytes, file_dict, gz_name, file_dict["arxiv_id"])
+        _decode_n_store(raw_bytes, file_dict, gz_name)
 
 
-def _decode_n_store(raw_bytes, file_dict, file_path, paper):
+def _decode_n_store(raw_bytes, file_dict, file_path):
     """
     Try to detect the encoding of the byte_string (raw_bytes), encode it respectively,
     and put the resulting string into the file_dict with file_path as key.
-    The arg paper is needed for proper error reports.
     """
-    # Detect the encoding
-    detector = UniversalDetector()
-    for line in raw_bytes.splitlines():
-        detector.feed(line)
-        if detector.done: break
-    detector.close()
-    encoding = detector.result['encoding']
-    
-    # if chardet could not detect an encoding (encoding is None), we don't make an entry for this file in the file_dict
-    if encoding:
+
+    # try different possible encodings. If one of them succeeds: decode, store and return.
+    for encoding in encodings:
         try:
             decoded = raw_bytes.decode(encoding)
             file_dict[file_path] = decoded 
             file_dict[file_path + "_enc"] = encoding
+            return
         except UnicodeDecodeError:
-            logging.warning("Decode Error for file {} in paper {}".format(file_path, paper))
+            pass
+
+    logging.warning("Did not find suitable encoding for file {} in paper {}".format(file_path, file_dict["arxiv_id"]))
