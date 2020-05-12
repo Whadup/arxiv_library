@@ -27,13 +27,11 @@ def pipeline(tar_dir, json_dir):
     paper_total = 0
 
     for tar_path in (os.path.join(tar_dir, p) for p in tar_paths):
-        paths = io_pkg.targz.tar_to_file_dict(tar_path)
-
-        for path in paths:
+        for targz in io_pkg.targz.process_tar(tar_path):
             paper_total += 1
 
             try:
-                file_dict = io_pkg.targz.gz_to_file_dict(path)
+                file_dict = io_pkg.targz.process_gz(targz)
 
                 file_dict = preprocessing.comments.remove_comments(file_dict)
                 paper_dict = preprocessing.imports.resolve_imports(file_dict)
@@ -71,6 +69,7 @@ def pipeline(tar_dir, json_dir):
 
             except Exception as exception:
                 logging.warning(exception)
+                traceback.print_exc()
                 failed_critical += 1
 
     if debug:
