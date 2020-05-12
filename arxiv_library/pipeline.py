@@ -92,11 +92,6 @@ def _extraction_thread(tar_dir):
     while remaining_file_dict_ids:
         ready_file_dict_ids, remaining_file_dict_ids = ray.wait(file_dict_ids, num_returns=1)  # TODO ueberschreibt das die ready ids?
 
-        print(len(ready_file_dict_ids))
-        test = ray.get(ready_file_dict_ids[0])
-        print(type(test))
-        return
-
         for id in ready_file_dict_ids:
             _pipeline_input_queue.put(id)
 
