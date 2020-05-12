@@ -3,6 +3,7 @@ import json
 import os
 import logging
 import traceback
+import psutil
 import io_pkg.targz
 import io_pkg.metadata
 import io_pkg.paths
@@ -16,44 +17,40 @@ import compilation.mathml
 
 
 @ray.remote
-def _extract(targz):
-    try:
-        return io_pkg.targz.process_gz(targz)
+def _extract(targzs):
+    processed = []
 
-    except Exception as exception:
-        logging.warning(exception)
+    for gz in targzs:
+        try:
+            processed.append(io_pkg.targz.process_gz(gz))
 
+        except Exception as exception:
+            logging.warning(exception)
 
-@ray.remote
-def _save(paper_dict, json_dir):
-    try:
-        with open(os.path.join(json_dir, '{}.json'.format(paper_dict['arxiv_id'])), 'w') as file:
-            json.dump(paper_dict, file, indent=4)
-
-    except Exception as exception:
-        logging.warning(exception)
+    return processed
 
 
 def pipeline(tar_dir, json_dir):
-    ray.init()
+    ray.init(num_cpus=1)
 
     tar_paths = os.listdir(tar_dir)
-    file_dict_ids = []
+    file_dict_chunk_ids = []
     cache = []
 
     for tar_path in (os.path.join(tar_dir, p) for p in tar_paths):
-        for targz in io_pkg.targz.process_tar(tar_path):
-            file_dict_ids.append(_extract.remote(targz))
+        targzs = list(io_pkg.targz.process_tar(tar_path))
+        chunk_size = len(targzs) // psutil.cpu_count()
 
-    remaining_file_dict_ids = True
+        for chunk in (targzs[i:i + chunk_size] for i in range(0, len(targzs), chunk_size)):
+            file_dict_chunk_ids.append(_extract.remote(chunk))
 
-    while remaining_file_dict_ids:
-        ready_file_dict_ids, remaining_file_dict_ids = ray.wait(file_dict_ids, num_returns=1)
+    remaining_chunk_ids = True
 
-        for file_dict_id in ready_file_dict_ids:
+    while remaining_chunk_ids:
+        ready_chunk_ids, remaining_chunk_ids = ray.wait(file_dict_chunk_ids, num_returns=1)
+
+        for file_dict in (fd for chunk_id in ready_chunk_ids for fd in ray.get(chunk_id)):
             try:
-                file_dict = ray.get(file_dict_id)
-
                 file_dict = preprocessing.comments.remove_comments(file_dict)
                 paper_dict = preprocessing.imports.resolve_imports(file_dict)
 
@@ -66,11 +63,17 @@ def pipeline(tar_dir, json_dir):
 
                 cache.append(paper_dict)
 
-                if len(cache) > 100 or not remaining_file_dict_ids:
+                print(len(cache))
+
+                if len(cache) > 100 or not remaining_chunk_ids:
                     paper_dicts = io_pkg.metadata.receive_meta_data(cache)
 
+                    # for pd in paper_dicts:
+                    #     _save.remote(pd, json_dir)
+
                     for pd in paper_dicts:
-                        _save.remote(pd, json_dir)
+                        with open(os.path.join(json_dir, '{}.json'.format(pd['arxiv_id'])), 'w') as file:
+                            json.dump(pd, file, indent=4)
 
             except Exception as exception:
                 logging.warning(exception)

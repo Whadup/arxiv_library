@@ -8,6 +8,6 @@ setup(name='arxiv_library',
       author_email='{lukas.pfahler, jonathan.schill, jan-philip.richter}@tu-dortmund.de',
       license='MIT',
       packages=['arxiv_library'],
-      install_requires=['arxiv', 'ray', 'python-magic', 'chardet'],
+      install_requires=['arxiv', 'ray', 'python-magic', 'chardet', 'psutil'],
       zip_safe=False
       )
