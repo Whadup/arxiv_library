@@ -16,7 +16,7 @@ import extraction.citations
 import compilation.mathml
 
 
-@ray.remote
+@ray.remote(num_cpus=1)
 def _extract(targzs):
     processed = []
 
@@ -30,7 +30,7 @@ def _extract(targzs):
     return processed
 
 
-@ray.remote
+@ray.remote(num_cpus=1)
 def _pipeline(file_dicts, json_dir):
     paper_dicts = []
 
@@ -63,12 +63,14 @@ def _pipeline(file_dicts, json_dir):
 
 
 def pipeline(tar_dir, json_dir):
-    ray.init(num_cpus=1)
+    ray.init(log_to_driver=False, redis_max_memory=1000000000, object_store_memory=2000000000, memory=1000000000)  # TODO reset store memory
     tar_paths = os.listdir(tar_dir)
+
+    # TODO wieso ist die cpu auslastung so gut, wenn man num_cpus=1 bei ray init setzt? warum ist das anders als woall?
 
     for tar_path in (os.path.join(tar_dir, p) for p in tar_paths):
         targzs = io_pkg.targz.process_tar(tar_path)
-        chunk_size = len(targzs) // (psutil.cpu_count() // 2)
+        chunk_size = len(targzs) // (psutil.cpu_count() // 2)  # TODO 4 ausprobieren
 
         file_dict_chunk_ids = []
 
