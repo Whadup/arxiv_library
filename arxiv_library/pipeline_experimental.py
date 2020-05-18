@@ -34,7 +34,6 @@ def _extract(targz):
 
     except Exception as exception:
         logging.warning(exception)
-        # traceback.print_exc()
 
 
 @ray.remote
@@ -54,17 +53,15 @@ def _pipe(file_dict_id):
 
     except Exception as exception:
         logging.warning(exception)
-        # traceback.print_exc()
 
 
 @ray.remote
-def _metadata(paper_dict_ids):
+def _metadata(paper_dict_id):
     try:
-        papers = io_pkg.metadata.receive_meta_data(paper_dict_ids)
+        return io_pkg.metadata.receive_meta_data([paper_dict_id])[0]  # TODO sammeln
 
     except Exception as exception:
         logging.warning(exception)
-        # traceback.print_exc()
 
 
 @ray.remote
@@ -75,7 +72,6 @@ def _save(paper_dict, json_dir):
 
     except Exception as exception:
         logging.warning(exception)
-        # traceback.print_exc()
 
 
 def _extraction_thread(tar_dir):
@@ -99,30 +95,43 @@ def _pipeline_thread():
     while not _extraction_finished.is_set() or not _pipeline_input_queue.empty():
         file_dict_id = _pipeline_input_queue.get()
         paper_dict_id = _pipe.remote(file_dict_id)
-        _saving_input_queue.put(paper_dict_id)
+        _metadata_input_queue.put(paper_dict_id)
 
     _pipeline_finished.set()
 
 
+def _metadata_thread():
+    while not _metadata_finished.is_set() or not _metadata_input_queue.empty():
+        file_dict_id = _metadata_input_queue.get()
+        paper_dict_id = _metadata.remote(file_dict_id)
+        _saving_input_queue.put(paper_dict_id)
+
+    _metadata_finished.set()
+
+
 def _saving_thread(json_dir):
-    while not _pipeline_finished.is_set() or not _saving_input_queue.empty():
+    while not _metadata_finished.is_set() or not _saving_input_queue.empty():
         paper_dict_id = _saving_input_queue.get()
         result_id = _save.remote(paper_dict_id, json_dir)
+        ray.get(result_id)
 
 
 def pipeline(tar_dir, json_dir):
-    ray.init()
+    ray.init(log_to_driver=False)
 
     _extraction = threading.Thread(target=_extraction_thread, args=(tar_dir,))
     _pipeline = threading.Thread(target=_pipeline_thread)
+    _metadata = threading.Thread(target=_metadata_thread)
     _saving = threading.Thread(target=_saving_thread, args=(json_dir,))
 
     _extraction.start()
     _pipeline.start()
+    _metadata.start()
     _saving.start()
 
     _extraction.join()
     _pipeline.join()
+    _metadata.join()
     _saving.join()
 
     ray.shutdown()

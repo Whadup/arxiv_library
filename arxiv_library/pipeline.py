@@ -69,7 +69,7 @@ def pipeline(tar_dir, json_dir):
 
     for tar_path in (os.path.join(tar_dir, p) for p in tar_paths):
         targzs = io_pkg.targz.process_tar(tar_path)
-        chunk_size = len(targzs) // (psutil.cpu_count() // 1)  # TODO evlt andere ausprobieren? scheint aber gut
+        chunk_size = max(len(targzs) // (psutil.cpu_count()), 1)
 
         remaining_chunk_ids = []
 
