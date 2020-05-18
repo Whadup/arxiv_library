@@ -4,6 +4,7 @@ import os
 import threading
 import queue
 import logging
+import time
 import traceback
 import io_pkg.targz
 import io_pkg.metadata
@@ -33,7 +34,7 @@ def _extract(targz):
 
     except Exception as exception:
         logging.warning(exception)
-        traceback.print_exc()
+        # traceback.print_exc()
 
 
 @ray.remote
@@ -53,7 +54,7 @@ def _pipe(file_dict_id):
 
     except Exception as exception:
         logging.warning(exception)
-        traceback.print_exc()
+        # traceback.print_exc()
 
 
 @ray.remote
@@ -63,38 +64,35 @@ def _metadata(paper_dict_ids):
 
     except Exception as exception:
         logging.warning(exception)
-        traceback.print_exc()
+        # traceback.print_exc()
 
 
 @ray.remote
-def _save(paper_dict_id, json_dir):
+def _save(paper_dict, json_dir):
     try:
-        paper_dict = ray.get(paper_dict_id)
-
         with open(os.path.join(json_dir, '{}.json'.format(paper_dict['arxiv_id'])), 'w') as file:
             json.dump(paper_dict, file, indent=4)
 
     except Exception as exception:
         logging.warning(exception)
-        traceback.print_exc()
+        # traceback.print_exc()
 
 
 def _extraction_thread(tar_dir):
     tar_paths = os.listdir(tar_dir)
-    file_dict_ids = []
+    remaining_file_dict_ids = []
 
     for tar_path in (os.path.join(tar_dir, p) for p in tar_paths):
         for targz in io_pkg.targz.process_tar(tar_path):
-            file_dict_ids.append(_extract.remote(targz))
-
-    remaining_file_dict_ids = True
+            remaining_file_dict_ids.append(_extract.remote(targz))
 
     while remaining_file_dict_ids:
-        ready_file_dict_ids, remaining_file_dict_ids = ray.wait(file_dict_ids, num_returns=1)
+        ready_file_dict_ids, remaining_file_dict_ids = ray.wait(remaining_file_dict_ids, num_returns=1)
 
         for id in ready_file_dict_ids:
             _pipeline_input_queue.put(id)
 
+    time.sleep(10)
     _extraction_finished.set()
 
 
@@ -104,11 +102,12 @@ def _pipeline_thread():
         paper_dict_id = _pipe.remote(file_dict_id)
         _saving_input_queue.put(paper_dict_id)
 
+    time.sleep(10)
     _pipeline_finished.set()
 
 
 def _saving_thread(json_dir):
-    while _pipeline_finished.is_set() or not _saving_input_queue.empty():
+    while not _pipeline_finished.is_set() or not _saving_input_queue.empty():
         paper_dict_id = _saving_input_queue.get()
         result_id = _save.remote(paper_dict_id, json_dir)
 
