@@ -63,24 +63,22 @@ def _pipeline(file_dicts, json_dir):
 
 
 def pipeline(tar_dir, json_dir):
-    ray.init(log_to_driver=False)  # TODO reset store memory
+    ray.init(log_to_driver=False)
     tar_paths = os.listdir(tar_dir)
-
-    # TODO wieso ist die cpu auslastung so gut, wenn man num_cpus=1 bei ray init setzt? warum ist das anders als woall?
 
     for tar_path in (os.path.join(tar_dir, p) for p in tar_paths):
         targzs = io_pkg.targz.process_tar(tar_path)
         chunk_size = len(targzs) // (psutil.cpu_count() // 2)  # TODO 4 ausprobieren
 
-        file_dict_chunk_ids = []
+        remaining_chunk_ids = []
 
         for chunk in (targzs[i:i + chunk_size] for i in range(0, len(targzs), chunk_size)):
-            file_dict_chunk_ids.append(_extract.remote(chunk))
+            remaining_chunk_ids.append(_extract.remote(chunk))
 
         pipeline_ids = []
 
-        while file_dict_chunk_ids:
-            ready_chunk_ids, file_dict_chunk_ids = ray.wait(file_dict_chunk_ids, num_returns=1)
+        while remaining_chunk_ids:
+            ready_chunk_ids, remaining_chunk_ids = ray.wait(remaining_chunk_ids, num_returns=1)
 
             for chunk_id in ready_chunk_ids:
                 pipeline_ids.append(_pipeline.remote(chunk_id, json_dir))
