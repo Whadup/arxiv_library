@@ -69,7 +69,7 @@ def pipeline(tar_dir, json_dir):
 
     for tar_path in (os.path.join(tar_dir, p) for p in tar_paths):
         targzs = io_pkg.targz.process_tar(tar_path)
-        chunk_size = len(targzs) // (psutil.cpu_count() // 2)  # TODO 4 ausprobieren
+        chunk_size = len(targzs) // (psutil.cpu_count() // 2)  # TODO evlt andere ausprobieren? scheint aber gut
 
         remaining_chunk_ids = []
 
@@ -90,13 +90,10 @@ def pipeline(tar_dir, json_dir):
 
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description='')
+    parser = argparse.ArgumentParser(description='')  # TODO description
 
-    parser.add_argument('citations',
-                        help='Extracts citations for a list of paper dictionaries and returns the list to std out. The '
-                             'citations will be saved as list under the key "citations".'
-    )
+    parser.add_argument('tar-path', help='the folder where the tar files are located', type=str)
+    parser.add_argument('json-path', help='the folder where the results will be stored', type=str)
 
     args = parser.parse_args()
-
-    pass
+    pipeline(args.tar_path, args.json_path)
