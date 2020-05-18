@@ -92,7 +92,6 @@ def _extraction_thread(tar_dir):
         for id in ready_file_dict_ids:
             _pipeline_input_queue.put(id)
 
-    time.sleep(10)
     _extraction_finished.set()
 
 
@@ -102,7 +101,6 @@ def _pipeline_thread():
         paper_dict_id = _pipe.remote(file_dict_id)
         _saving_input_queue.put(paper_dict_id)
 
-    time.sleep(10)
     _pipeline_finished.set()
 
 
