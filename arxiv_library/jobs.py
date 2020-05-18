@@ -6,9 +6,6 @@ import argparse
 import extraction.citations
 
 
-# TODO rausfinden wie man json strings list element by element lesen kann damit der buffer geflushed wird
-
-
 def extract_citations():
     ray.init()
 
@@ -29,14 +26,22 @@ def extract_citations():
 
         return paper_dicts
 
+    paper_dicts_stdin = []
 
-    paper_dicts_stdin = json.loads(input())
+    while True:
+        try:
+            paper_dicts_stdin.append(json.loads(input()))
+
+        except EOFError:
+            break
 
     chunk_size = len(paper_dicts_stdin) // psutil.cpu_count()
     generator = (paper_dicts_stdin[i:i + chunk_size] for i in range(0, len(paper_dicts_stdin), chunk_size))
     paper_dicts = [extract.remote(chunk) for chunk in generator]
 
-    sys.stdout.write(json.dumps(ray.get(paper_dicts)))
+    for paper_dict in ray.get(paper_dicts):
+        sys.stdout.write(json.dumps(paper_dict))
+
     ray.shutdown()
 
 
