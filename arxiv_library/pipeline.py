@@ -92,8 +92,8 @@ def pipeline(tar_dir, json_dir):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='')  # TODO description
 
-    parser.add_argument('tar-path', help='the folder where the tar files are located', type=str)
-    parser.add_argument('json-path', help='the folder where the results will be stored', type=str)
+    parser.add_argument('tar_path', help='the folder where the tar files are located', type=str)
+    parser.add_argument('json_path', help='the folder where the results will be stored', type=str)
 
     args = parser.parse_args()
     pipeline(args.tar_path, args.json_path)
