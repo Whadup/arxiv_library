@@ -18,8 +18,6 @@ def pipeline(tar_dir, json_dir):
     tar_paths = os.listdir(tar_dir)
     cache = []
 
-    debug = True
-
     success_on_compile = 0
     failed_on_compile = 0
     failed_on_metadata = 0
@@ -45,23 +43,25 @@ def pipeline(tar_dir, json_dir):
 
                 paper_dict = compilation.mathml.compile_paper(paper_dict, paper_dict['arxiv_id'])
 
-                if debug:
-                    for section in paper_dict['sections']:
-                        for equation in section['equations']:
-                            if not equation['mathml']:
-                                failed_on_compile += 1
-                            else:
-                                success_on_compile += 1
+                # debug start
+                for section in paper_dict['sections']:
+                    for equation in section['equations']:
+                        if not equation['mathml']:
+                            failed_on_compile += 1
+                        else:
+                            success_on_compile += 1
+                # debug end
 
                 cache.append(paper_dict)
 
                 if len(cache) > 100 or i == len(targzs) - 1:
                     paper_dicts = io_pkg.metadata.receive_meta_data(cache)
 
-                    if debug:
-                        for pd in paper_dicts:
-                            if 'metadata' not in pd.keys():
-                                failed_on_metadata += 1
+                    # debug start
+                    for pd in paper_dicts:
+                        if 'metadata' not in pd.keys():
+                            failed_on_metadata += 1
+                    # debug end
 
                     for pd in paper_dicts:
                         with open(os.path.join(json_dir, '{}.json'.format(pd['arxiv_id'])), 'w') as file:
@@ -73,9 +73,8 @@ def pipeline(tar_dir, json_dir):
                 logging.warning(exception)
                 failed_critical += 1
 
-    if debug:
-        logging.warning('{} equations not compiled to mathml!'.format(failed_on_compile))
-        logging.warning('{} equations got compiled to mathml!'.format(success_on_compile))
-        logging.warning('{} papers without metadata!'.format(failed_on_metadata))
-        logging.warning('{} critical pipeline errors!'.format(failed_critical))
-        logging.warning('{} papers processed in total!'.format(paper_total))
+    logging.warning('{} equations not compiled to mathml!'.format(failed_on_compile))
+    logging.warning('{} equations got compiled to mathml!'.format(success_on_compile))
+    logging.warning('{} papers without metadata!'.format(failed_on_metadata))
+    logging.warning('{} critical pipeline errors!'.format(failed_critical))
+    logging.warning('{} papers processed in total!'.format(paper_total))
