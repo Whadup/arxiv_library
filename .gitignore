@@ -9,3 +9,4 @@ test/src_tar_test*
 *.log
 arxiv_library/my_test.py
 arxiv_library/1tar.py
+arxiv_library/io_pkg/encodings.txt
