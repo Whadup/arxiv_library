@@ -63,7 +63,7 @@ def _pipeline(file_dicts, json_dir):
 
 
 def pipeline(tar_dir, json_dir):
-    ray.init(log_to_driver=False, redis_max_memory=1000000000, object_store_memory=2000000000, memory=1000000000)  # TODO reset store memory
+    ray.init(log_to_driver=False)  # TODO reset store memory
     tar_paths = os.listdir(tar_dir)
 
     # TODO wieso ist die cpu auslastung so gut, wenn man num_cpus=1 bei ray init setzt? warum ist das anders als woall?
@@ -77,12 +77,14 @@ def pipeline(tar_dir, json_dir):
         for chunk in (targzs[i:i + chunk_size] for i in range(0, len(targzs), chunk_size)):
             file_dict_chunk_ids.append(_extract.remote(chunk))
 
-        remaining_chunk_ids = True
+        pipeline_ids = []
 
-        while remaining_chunk_ids:
-            ready_chunk_ids, remaining_chunk_ids = ray.wait(file_dict_chunk_ids, num_returns=1)
+        while file_dict_chunk_ids:
+            ready_chunk_ids, file_dict_chunk_ids = ray.wait(file_dict_chunk_ids, num_returns=1)
 
             for chunk_id in ready_chunk_ids:
-                _pipeline.remote(chunk_id, json_dir)
+                pipeline_ids.append(_pipeline.remote(chunk_id, json_dir))
+
+        ray.wait(pipeline_ids, num_returns=len(pipeline_ids))
 
     ray.shutdown()
