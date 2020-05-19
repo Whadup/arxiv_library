@@ -40,7 +40,7 @@ stdin.on('data', function (chunk) {
 });
 
 stdin.on('end', function () {
-    var inputJSON = inputChunks.join(),
+    var inputJSON = inputChunks.join(""),
         parsedData = JSON.parse(inputJSON),
         output = [];
     preamble = parsedData.preamble;
