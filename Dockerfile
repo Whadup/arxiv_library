@@ -20,6 +20,11 @@ RUN apt-get install -y \
 	git \
 	openssh-client
 
+RUN apt-get install -y npm
+RUN npm install -g yargs mathjax-node mathjax-node-sre katex
+COPY arxiv_library/compilation/js/katex.js /usr/local/lib/node_modules/katex/dist/
+ENV NODE_PATH "/usr/local/lib/node_modules"
+
 ENV MINICONDA_VERSION 4.7.10
 ENV MINICONDA_MD5 1c945f2b3335c7b2b15130b1b2dc5cf4
 
@@ -43,11 +48,6 @@ ENV PATH $CONDA_DIR/bin:$PATH
 COPY environment.yml .
 RUN source $CONDA_DIR/bin/activate && conda env create -f environment.yml && rm environment.yml
 
-
-RUN apt-get install -y npm
-RUN npm install -g yargs mathjax-node mathjax-node-sre katex
-COPY arxiv_library/compilation/js/katex.js /usr/local/lib/node_modules/katex/dist/
-ENV NODE_PATH "/usr/local/lib/node_modules"
 
 # Create a new user.
 RUN mkdir -p "/home/${USER}" && \
