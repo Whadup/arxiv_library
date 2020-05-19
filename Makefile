@@ -1,7 +1,7 @@
 build: check-environment
-	find .. -size +50M | xargs -i% echo "WARNING: Not sending large file to Docker %"
+	find . -size +50M | xargs -i% echo "WARNING: Not sending large file to Docker %"
 	docker rmi s876cnsm:5000/${USER}-arxiv_extraction
-	cd .. && find . -size +50M > .dockerignore && \
+	find . -size +50M > .dockerignore && \
 		docker build -t s876cnsm:5000/${USER}-arxiv_extraction . \
 		-f Dockerfile \
 		--build-arg USER=${USER} \
@@ -10,8 +10,8 @@ build: check-environment
 	docker push s876cnsm:5000/${USER}-arxiv_extraction
 
 build-unsafe: check-environment
-	cd .. && rm -f .dockerignore && \
-		docker build -t s876cnsm:5000/${USER}-arxiv_extraction . \
+	rm -f .dockerignore && \
+	docker build -t s876cnsm:5000/${USER}-arxiv_extraction . \
 		-f Dockerfile \
 		--build-arg USER=${USER} \
 		--build-arg USERID=${UID} \
