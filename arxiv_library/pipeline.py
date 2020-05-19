@@ -49,6 +49,8 @@ def _pipeline(file_dicts, json_dir, fulltext):
             paper_dict = extraction.citations.extract_citations(paper_dict)
 
             if not fulltext:
+                for section in paper_dict['sections']:
+                    del section['latex']
                 del paper_dict['paper']
 
             paper_dict = compilation.mathml.compile_paper(paper_dict, paper_dict['arxiv_id'])
