@@ -1,7 +1,6 @@
 import json
 import os
 import logging
-import traceback
 import preprocessing.comments
 import preprocessing.imports
 import extraction.preamble

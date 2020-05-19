@@ -1,9 +1,6 @@
 import arxiv
 import itertools
 import re
-import os
-import json
-import argparse
 
 
 _paper_version_tag = re.compile(r"v[0-9]+$")

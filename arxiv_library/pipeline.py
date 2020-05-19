@@ -2,7 +2,6 @@ import ray
 import json
 import os
 import logging
-import traceback
 import argparse
 import psutil
 import tqdm

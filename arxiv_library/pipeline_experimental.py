@@ -4,8 +4,6 @@ import os
 import threading
 import queue
 import logging
-import time
-import traceback
 import io_pkg.targz
 import io_pkg.metadata
 import io_pkg.paths
