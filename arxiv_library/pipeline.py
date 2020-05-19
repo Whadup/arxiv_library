@@ -49,9 +49,9 @@ def _pipeline(file_dicts, json_dir, fulltext):
             paper_dict = extraction.citations.extract_citations(paper_dict)
 
             if not fulltext:
+                del paper_dict['paper']
                 for section in paper_dict['sections']:
                     del section['latex']
-                del paper_dict['paper']
 
             paper_dict = compilation.mathml.compile_paper(paper_dict, paper_dict['arxiv_id'])
             paper_dicts.append(paper_dict)
@@ -105,19 +105,21 @@ def pipeline(tar_dir, json_dir, fulltext=False):
 
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description='')  # TODO description
+    parser = argparse.ArgumentParser(description='This script extracts tar archives containing tar.gz files of arxiv'
+                                                 ' papers and generates a dictionary for each paper, containing '
+                                                 'citations, metadata and equations in latex and mathml format.')
 
     parser.add_argument(
         'tar_path',
-        help='the folder where the tar files are located',
+        help='The directory where the tar files are located',
         type=str)
     parser.add_argument(
         'json_path',
-        help='the folder where the results will be stored',
+        help='The directory where the resulting json files will be stored',
         type=str)
     parser.add_argument(
         '-fulltext',
-        help='iff flag is set, the paper will be stored in the paperdict with key "paper"',
+        help='Iff this flag is set, the paper will be stored in the paper dict with key "paper"',
         action='store_true')
 
     args = parser.parse_args()
