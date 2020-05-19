@@ -1,0 +1,13 @@
+name: arxiv
+dependencies:
+  - pip>=19.2.2
+  - python>=3.7
+  - tqdm>=4.31.1
+  - psutil
+  - pip:
+    - ray
+    - python-magic
+    - arxiv
+    - chardet
+
+

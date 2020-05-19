@@ -32,7 +32,7 @@ def _extract(targzs):
 
 
 @ray.remote(num_cpus=1)
-def _pipeline(file_dicts, json_dir):
+def _pipeline(file_dicts, json_dir, fulltext):
     paper_dicts = []
 
     for file_dict in file_dicts:
@@ -44,6 +44,9 @@ def _pipeline(file_dicts, json_dir):
             paper_dict = extraction.sections.extract_sections(paper_dict)
             paper_dict = extraction.equations.extract_equations(paper_dict)
             paper_dict = extraction.citations.extract_citations(paper_dict)
+
+            if not fulltext:
+                del paper_dict['paper']
 
             paper_dict = compilation.mathml.compile_paper(paper_dict, paper_dict['arxiv_id'])
 
@@ -65,8 +68,8 @@ def _pipeline(file_dicts, json_dir):
         logging.warning(exception)
 
 
-def pipeline(tar_dir, json_dir):
-    ray.init(log_to_driver=False)
+def pipeline(tar_dir, json_dir, fulltext=False):
+    ray.init(log_to_driver=True)
     tar_paths = os.listdir(tar_dir)
 
     for tar_path in (os.path.join(tar_dir, p) for p in tar_paths):
@@ -84,7 +87,7 @@ def pipeline(tar_dir, json_dir):
             ready_chunk_ids, remaining_chunk_ids = ray.wait(remaining_chunk_ids, num_returns=1)
 
             for chunk_id in ready_chunk_ids:
-                pipeline_ids.append(_pipeline.remote(chunk_id, json_dir))
+                pipeline_ids.append(_pipeline.remote(chunk_id, json_dir, fulltext))
 
         ray.wait(pipeline_ids, num_returns=len(pipeline_ids))
 
@@ -94,8 +97,18 @@ def pipeline(tar_dir, json_dir):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='')  # TODO description
 
-    parser.add_argument('tar_path', help='the folder where the tar files are located', type=str)
-    parser.add_argument('json_path', help='the folder where the results will be stored', type=str)
+    parser.add_argument(
+        'tar_path',
+        help='the folder where the tar files are located',
+        type=str)
+    parser.add_argument(
+        'json_path',
+        help='the folder where the results will be stored',
+        type=str)
+    parser.add_argument(
+        '-fulltext',
+        help='if flag is set, the paper will be stored in the paperdict with key "paper"',
+        action='store_true')
 
     args = parser.parse_args()
-    pipeline(args.tar_path, args.json_path)
+    pipeline(args.tar_path, args.json_path, args.fulltext)
