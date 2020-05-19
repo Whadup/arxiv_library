@@ -19,12 +19,10 @@ import compilation.mathml
 
 
 _pipeline_input_queue = queue.Queue(maxsize=200)
-_metadata_input_queue = queue.Queue(maxsize=200)
 _saving_input_queue = queue.Queue(maxsize=200)
 
 _extraction_finished = threading.Event()
 _pipeline_finished = threading.Event()
-_metadata_finished = threading.Event()
 
 
 @ray.remote
@@ -56,15 +54,6 @@ def _pipeline_process(file_dict_id):
 
 
 @ray.remote
-def _metadata_process(paper_dict_ids):
-    try:
-        return io_pkg.metadata.receive_meta_data(paper_dict_ids)
-
-    except Exception as exception:
-        logging.warning(exception)
-
-
-@ray.remote
 def _saving_process(paper_dict, json_dir):
     try:
         with open(os.path.join(json_dir, '{}.json'.format(paper_dict['arxiv_id'])), 'w') as file:
@@ -86,10 +75,7 @@ def _extraction_thread(tar_dir):
         ready_file_dict_ids, remaining_file_dict_ids = ray.wait(remaining_file_dict_ids, num_returns=1)
 
         for file_dict_id in ready_file_dict_ids:
-            file_dict = ray.get(file_dict_id)
-
-            if file_dict:
-                _pipeline_input_queue.put(file_dict)
+            _pipeline_input_queue.put(file_dict_id)
 
     _extraction_finished.set()
 
@@ -98,33 +84,13 @@ def _pipeline_thread():
     while not _extraction_finished.is_set() or not _pipeline_input_queue.empty():
         file_dict_id = _pipeline_input_queue.get()
         paper_dict_id = _pipeline_process.remote(file_dict_id)
-        paper_dict = ray.get(paper_dict_id)
-
-        if paper_dict:
-            _metadata_input_queue.put(paper_dict)
+        _saving_input_queue.put(paper_dict_id)
 
     _pipeline_finished.set()
 
 
-def _metadata_thread():
-    cache = []
-
-    while not _pipeline_finished.is_set() or not _metadata_input_queue.empty():
-        cache.append(_metadata_input_queue.get())
-
-        if len(cache) > 100 or _pipeline_finished.is_set():
-            paper_dict_ids = _metadata_process.remote(cache)
-            paper_dicts = ray.get(paper_dict_ids)
-
-            if paper_dicts:
-                for paper_dict in paper_dicts:
-                    _saving_input_queue.put(paper_dict)
-
-    _metadata_finished.set()
-
-
 def _saving_thread(json_dir):
-    while not _metadata_finished.is_set() or not _saving_input_queue.empty():
+    while not _pipeline_finished.is_set() or not _saving_input_queue.empty():
         paper_dict_id = _saving_input_queue.get()
         result_id = _saving_process.remote(paper_dict_id, json_dir)
         ray.get(result_id)
@@ -135,17 +101,14 @@ def pipeline(tar_dir, json_dir):
 
     _extraction = threading.Thread(target=_extraction_thread, args=(tar_dir,))
     _pipeline = threading.Thread(target=_pipeline_thread)
-    _metadata = threading.Thread(target=_metadata_thread)
     _saving = threading.Thread(target=_saving_thread, args=(json_dir,))
 
     _extraction.start()
     _pipeline.start()
-    _metadata.start()
     _saving.start()
 
     _extraction.join()
     _pipeline.join()
-    _metadata.join()
     _saving.join()
 
     ray.shutdown()
