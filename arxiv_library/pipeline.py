@@ -27,6 +27,7 @@ def _extract(targzs):
 
         except io_pkg.targz.EmptyFileDictException as exception:
             logging.debug(exception)
+
         except Exception as exception:
             logging.warning(exception)
 
@@ -57,6 +58,7 @@ def _pipeline(file_dicts, json_dir, fulltext):
 
         except preprocessing.imports.NoMainFileException as exception:
             logging.debug(exception)
+
         except Exception as exception:
             logging.warning(exception)
 
@@ -72,7 +74,7 @@ def _pipeline(file_dicts, json_dir, fulltext):
 
 
 def pipeline(tar_dir, json_dir, fulltext=False):
-    ray.init(log_to_driver=False)
+    ray.init(log_to_driver=True)
     tar_paths = os.listdir(tar_dir)
     total_papers = 0
 
