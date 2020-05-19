@@ -4,11 +4,11 @@ dependencies:
   - python>=3.7
   - numpy
   - tqdm>=4.31.1
+  - psutil
   - pip:
     - ray
     - python-magic
     - arxiv
     - chardet
-    - psutil
 
 
