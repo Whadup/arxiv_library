@@ -101,4 +101,4 @@ def _decode_n_store(raw_bytes, file_dict, file_path):
         except UnicodeDecodeError:
             pass
 
-    logging.warning("Did not find suitable encoding for file {} in paper {}".format(file_path, file_dict["arxiv_id"]))
+    logging.debug("Did not find suitable encoding for file {} in paper {}".format(file_path, file_dict["arxiv_id"]))

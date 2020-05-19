@@ -25,6 +25,8 @@ def _extract(targzs):
         try:
             processed.append(io_pkg.targz.process_gz(gz))
 
+        except io_pkg.targz.EmptyFileDictException as exception:
+            logging.debug(exception)
         except Exception as exception:
             logging.warning(exception)
 
