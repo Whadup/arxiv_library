@@ -5,6 +5,7 @@ import logging
 import traceback
 import argparse
 import psutil
+import tqdm
 import io_pkg.targz
 import io_pkg.metadata
 import io_pkg.paths
@@ -69,27 +70,32 @@ def _pipeline(file_dicts, json_dir, fulltext):
 
 
 def pipeline(tar_dir, json_dir, fulltext=False):
-    ray.init(log_to_driver=True)
+    ray.init(log_to_driver=False)
     tar_paths = os.listdir(tar_dir)
+    total_papers = 0
 
-    for tar_path in (os.path.join(tar_dir, p) for p in tar_paths):
-        targzs = io_pkg.targz.process_tar(tar_path)
-        chunk_size = max(len(targzs) // (psutil.cpu_count()), 1)
+    with tqdm.tqdm(total=len(tar_paths), desc='{} papers in total | tar progress'.format(total_papers)) as progress:
+        for tar_path in (os.path.join(tar_dir, p) for p in tar_paths):
+            targzs = io_pkg.targz.process_tar(tar_path)
+            chunk_size = max(len(targzs) // (psutil.cpu_count()), 1)
 
-        remaining_chunk_ids = []
+            remaining_chunk_ids = []
 
-        for chunk in (targzs[i:i + chunk_size] for i in range(0, len(targzs), chunk_size)):
-            remaining_chunk_ids.append(_extract.remote(chunk))
+            for chunk in (targzs[i:i + chunk_size] for i in range(0, len(targzs), chunk_size)):
+                remaining_chunk_ids.append(_extract.remote(chunk))
 
-        pipeline_ids = []
+            pipeline_ids = []
 
-        while remaining_chunk_ids:
-            ready_chunk_ids, remaining_chunk_ids = ray.wait(remaining_chunk_ids, num_returns=1)
+            while remaining_chunk_ids:
+                ready_chunk_ids, remaining_chunk_ids = ray.wait(remaining_chunk_ids, num_returns=1)
 
-            for chunk_id in ready_chunk_ids:
-                pipeline_ids.append(_pipeline.remote(chunk_id, json_dir, fulltext))
+                for chunk_id in ready_chunk_ids:
+                    pipeline_ids.append(_pipeline.remote(chunk_id, json_dir, fulltext))
+                    total_papers += chunk_size
+                    progress.set_description_str('{} papers in total | tar progress'.format(total_papers))
 
-        ray.wait(pipeline_ids, num_returns=len(pipeline_ids))
+            ray.wait(pipeline_ids, num_returns=len(pipeline_ids))
+            progress.update(1)
 
     ray.shutdown()
 
@@ -107,7 +113,7 @@ if __name__ == '__main__':
         type=str)
     parser.add_argument(
         '-fulltext',
-        help='if flag is set, the paper will be stored in the paperdict with key "paper"',
+        help='iff flag is set, the paper will be stored in the paperdict with key "paper"',
         action='store_true')
 
     args = parser.parse_args()
