@@ -49,6 +49,8 @@ def _pipeline(file_dicts, json_dir):
 
             paper_dicts.append(paper_dict)
 
+        except preprocessing.imports.NoMainFileException as exception:
+            logging.debug(exception)
         except Exception as exception:
             logging.warning(exception)
 

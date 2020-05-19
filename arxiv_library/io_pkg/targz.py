@@ -4,8 +4,12 @@ import magic
 import os
 import logging
 import re
-from chardet.universaldetector import UniversalDetector
 from io import BytesIO
+
+
+class EmptyFileDictException(Exception):
+    pass
+
 
 encodings = ['utf-8', 'iso8859_1', 'cp1252', 'cp1251', 'shift_jis']
 
@@ -60,7 +64,7 @@ def process_gz(file_dict):
         logging.warning("Unexpected output of file/magic command: {}".format(file_type))
 
     if len(file_dict.keys()) <= 1:
-        raise ValueError("File dict for {} is empty.".format(file_dict["arxiv_id"]))
+        raise EmptyFileDictException("File dict for is empty. Arxiv ID: {}".format(file_dict["arxiv_id"]))
 
     return file_dict
 

@@ -114,9 +114,10 @@ def call_js(paper_dict, paper_id=""):
             timeout=120
         )
         if result.stderr:
-            logging.warning(result.stderr)
-        # print(result.stdout)
-        # print(result.stderr)
+            if "Error in LaTeX:KaTeX parse error" in result.stderr:
+                logging.debug("Compilation failed: {}".format(result.stderr))
+            else:
+                logging.warning("Unexpected error in tex2mathml.js:" + result.stderr)
         result = json.loads(result.stdout)
         result["preamble"] = result["preamble"].split("\n")
         return result

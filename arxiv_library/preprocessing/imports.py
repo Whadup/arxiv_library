@@ -10,6 +10,10 @@ _regexs = [
 ]
 
 
+class NoMainFileException(Exception):
+    pass
+
+
 def resolve_imports(file_dict):
     for path, text in file_dict.items(): 
         if path.endswith('.tex'):
@@ -19,7 +23,7 @@ def resolve_imports(file_dict):
                 except Exception as exception:
                     raise exception
 
-    raise ValueError('Did not find file with \\begin{{document}} in file dict.')
+    raise NoMainFileException('Did not find file with \\begin{{document}} in file dict. Arxiv ID: {}'.format(file_dict['arxiv_id']))
 
 
 def _resolve_imports(path, file_dict, depth=3):
