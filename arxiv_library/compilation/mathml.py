@@ -117,7 +117,7 @@ def call_js(paper_dict, paper_id=""):
             if "Error in LaTeX:KaTeX parse error" in result.stderr:
                 logging.debug("Compilation failed: {}".format(result.stderr))
             else:
-                logging.warning("Unexpected error in tex2mathml.js:" + result.stderr)
+                logging.warning("Unexpected error in tex2mathml.js (Arxiv ID: {}):".format(paper_dict["arxiv_id"]) + result.stderr)
         result = json.loads(result.stdout)
         result["preamble"] = result["preamble"].split("\n")
         return result

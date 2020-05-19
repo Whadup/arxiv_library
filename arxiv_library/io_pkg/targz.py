@@ -61,7 +61,7 @@ def process_gz(file_dict):
     elif tar_gz_match:
         _extract_tar_gz(member_buffer, file_dict)
     else:
-        logging.warning("Unexpected output of file/magic command: {}".format(file_type))
+        logging.debug("Unexpected output of file/magic command: {}".format(file_type))
 
     if len(file_dict.keys()) <= 1:
         raise EmptyFileDictException("File dict for is empty. Arxiv ID: {}".format(file_dict["arxiv_id"]))
