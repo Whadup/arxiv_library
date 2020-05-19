@@ -53,7 +53,6 @@ def _pipeline(file_dicts, json_dir, fulltext):
                 del paper_dict['paper']
 
             paper_dict = compilation.mathml.compile_paper(paper_dict, paper_dict['arxiv_id'])
-
             paper_dicts.append(paper_dict)
 
         except preprocessing.imports.NoMainFileException as exception:
@@ -77,7 +76,7 @@ def pipeline(tar_dir, json_dir, fulltext=False):
     tar_paths = os.listdir(tar_dir)
     total_papers = 0
 
-    with tqdm.tqdm(total=len(tar_paths), desc='{} papers in total | tar progress'.format(total_papers)) as progress:
+    with tqdm.tqdm(total=len(tar_paths), desc='0 papers in total | tar progress') as progress:
         for tar_path in (os.path.join(tar_dir, p) for p in tar_paths):
             targzs = io_pkg.targz.process_tar(tar_path)
             chunk_size = max(len(targzs) // (psutil.cpu_count()), 1)
