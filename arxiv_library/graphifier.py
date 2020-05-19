@@ -25,9 +25,6 @@ class Graph:
     def labels(self):
         return list(self.nodes.keys())
 
-    def __getitem__(self, item):
-        return self.labels()[item], self.nodes[self.labels()[item]]
-
     def __str__(self):
         string = ''
         keys = self.labels()
