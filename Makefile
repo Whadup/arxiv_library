@@ -6,7 +6,7 @@ build: check-environment
 		-f Dockerfile \
 		--build-arg USER=${USER} \
 		--build-arg USERID=${UID} \
-		--build-arg "constraint:nodetype!=phi"
+		--build-arg "constraint:node=s876gn03"
 	docker push s876cnsm:5000/${USER}-arxiv_extraction
 
 build-unsafe: check-environment
@@ -15,7 +15,7 @@ build-unsafe: check-environment
 		-f Dockerfile \
 		--build-arg USER=${USER} \
 		--build-arg USERID=${UID} \
-		--build-arg "constraint:node==s876gn02"
+		--build-arg "constraint:node==s876gn03"
 	docker push s876cnsm:5000/${USER}-arxiv_extraction
 run:
 	docker run --rm -ti \
