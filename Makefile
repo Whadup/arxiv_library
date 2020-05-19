@@ -6,7 +6,7 @@ build: check-environment
 		-f Dockerfile \
 		--build-arg USER=${USER} \
 		--build-arg USERID=${UID} \
-		--build-arg "constraint:node=s876gn03"
+		--build-arg "constraint:node==s876gn03"
 	docker push s876cnsm:5000/${USER}-arxiv_extraction
 
 build-unsafe: check-environment
