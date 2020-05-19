@@ -23,12 +23,12 @@ def id_from_filename(filename):
 
     if filename[0].isdigit():
         return filename
-
-    return '/'.join(["".join(x) for _, x in itertools.groupby(filename, key=str.isdigit)])
+    else:
+        return '/'.join(["".join(x) for _, x in itertools.groupby(filename, key=str.isdigit)])
 
 
 def receive_meta_data(paper_dicts, chunk_size=100):
-    arxiv_ids = [paper_dict['arxiv_id'] for paper_dict in paper_dicts]
+    arxiv_ids = [id_from_filename(paper_dict['arxiv_id']) for paper_dict in paper_dicts]
     chunk_generator = (arxiv_ids[i:i+chunk_size] for i in range(0, len(arxiv_ids), chunk_size))
 
     for chunk in chunk_generator:
@@ -41,10 +41,14 @@ def receive_meta_data(paper_dicts, chunk_size=100):
             paper_id = paper["id"].split("abs/")[1].replace("/", "")
             paper_id = _paper_version_tag.sub("", paper_id)
 
+            meta_data_set = False
+
             for paper_dict in paper_dicts:
                 if paper_id == paper_dict['arxiv_id']:
                     paper_dict['metadata'] = paper
+                    meta_data_set = True
                     break
+            assert meta_data_set, "Meta data was not set for Arxiv ID: {}".format(paper_id)
 
     return paper_dicts
 
