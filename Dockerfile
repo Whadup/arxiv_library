@@ -21,8 +21,6 @@ RUN apt-get install -y \
 	openssh-client
 
 RUN apt-get install -y npm
-RUN npm install -g yargs mathjax-node mathjax-node-sre katex
-COPY arxiv_library/compilation/js/katex.js /usr/local/lib/node_modules/katex/dist/
 ENV NODE_PATH "/usr/local/lib/node_modules"
 
 ENV MINICONDA_VERSION 4.7.10
@@ -45,6 +43,10 @@ RUN curl -s https://repo.anaconda.com/miniconda/Miniconda3-$MINICONDA_VERSION-Li
 ENV CONDA_DIR /opt/conda
 ENV PATH $CONDA_DIR/bin:$PATH
 
+# Install Node Modules
+RUN npm install -g yargs mathjax-node mathjax-node-sre katex
+COPY arxiv_library/compilation/js/katex.js /usr/local/lib/node_modules/katex/dist/
+# Install Python Modules
 COPY environment.yml .
 RUN source $CONDA_DIR/bin/activate && conda env create -f environment.yml && rm environment.yml
 
