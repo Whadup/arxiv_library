@@ -60,7 +60,7 @@ RUN mkdir -p "/home/${USER}" && \
 WORKDIR "/home/${USER}"
 RUN mkdir arxiv_library
 COPY . arxiv_library/
-RUN chown -R "${USER}" arxiv
+RUN chown -R "${USER}" arxiv_library
 USER "${USER}"
 RUN echo "source $CONDA_DIR/bin/activate" >> ~/.bashrc
 RUN echo "conda activate arxiv" >> ~/.bashrc
