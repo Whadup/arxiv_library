@@ -27,7 +27,8 @@ _pipeline_finished = threading.Event()
 def _extraction_process(targz):
     try:
         return io_pkg.targz.process_gz(targz)
-
+    except io_pkg.targz.EmptyFileDictException as exception:
+        logging.debug(exception)
     except Exception as exception:
         logging.warning(exception)
 
@@ -46,7 +47,8 @@ def _pipeline_process(file_dict_id):
         paper_dict = compilation.mathml.compile_paper(paper_dict, paper_dict['arxiv_id'])
 
         return paper_dict
-
+    except preprocessing.imports.NoMainFileException as exception:
+        logging.debug(exception)
     except Exception as exception:
         logging.warning(exception)
 
