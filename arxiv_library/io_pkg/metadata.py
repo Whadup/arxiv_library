@@ -43,7 +43,7 @@ def receive_meta_data(paper_dicts, chunk_size=100):
 
             for paper_dict in paper_dicts:
                 if paper_id == paper_dict['arxiv_id']:
-                    paper_dict['metadata'] = {}.update(paper)
+                    paper_dict['metadata'] = paper
                     break
 
     return paper_dicts
