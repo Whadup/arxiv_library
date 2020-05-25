@@ -30,16 +30,14 @@ Pipeline modules:
                     imports		    filedict -> paperdict {paper: str}
 
 	EXTRACTION      preamble	    paperdict -> paperdict {preamble: str, paper: str}
-                    sections	    paperdict -> paperdict {.. sections: [str]}
-                    equations	    paperdict -> paperdict {.. equations: [str]}
-                    citations	    paperdict -> paperdict {.. citations: [str (bibids)]}
+                    sections	    paperdict -> paperdict {.. sections: list}
+                    equations	    paperdict -> paperdict {.. sections: [equation: {no: int, latex: str}]}
+                    citations	    paperdict -> paperdict {.. citations: [str (arxiv id)]}
 	
-	COMPILATION     dict to latex
-                    latex to mathml
+	COMPILATION     mathml              paperdict -> paperdict {.. sections: [equation: {.. mathml: str}]}
 
     IO_PKG          targz               archive -> filedict(s)
-                    json-store
-	                metadata            paperdict -> paperdict
+	                metadata            paperdict -> paperdict {.. metadata: dict}
 		
 
 -----------------------
