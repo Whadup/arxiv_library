@@ -10,7 +10,7 @@ python pipeline.py </path/to/tar-archives> </path/to/output_dir>
 ```
 </path/to/tar-archives> should contain the tar-archives with the raw data. A tar-archive is organized as follows:
 One tar arxiv (e. g. "arXiv_src_1503_007.tar") contains the sources for multiple papers from March 2015.
-The members of the tar-archive represents one publication and can be of three different types:
+One member of the tar-archive represents one publication and can be of three different types:
 
 - A single gzip compressed tex-file 
 - A tar.gz archive
