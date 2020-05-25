@@ -8,19 +8,20 @@ class Graph:
 
     def __init__(self, directed=True):
         self.directed = directed
+
         self.nodes = []  # i -> [neighbour indices of i]
         self.labels = []  # i -> arxiv_id
-        self.indices = {}  # arxiv_id -> i
+        self.indices = {}  # arxiv_id -> i, fast check if id already exists
 
     def add(self, arxiv_id):
-        self.nodes.append(set())
-        self.labels.append(arxiv_id)
-        self.indices[arxiv_id] = len(self.nodes) - 1
+        if arxiv_id not in self.indices:
+            self.nodes.append(set())
+            self.labels.append(arxiv_id)
+            self.indices[arxiv_id] = len(self.nodes) - 1
 
     def link(self, arxiv_id_a, arxiv_id_b):
         index_a = self.indices[arxiv_id_a]
         index_b = self.indices[arxiv_id_b]
-
         self.nodes[index_a].add(index_b)
 
         if not self.directed:
@@ -81,4 +82,4 @@ if __name__ == '__main__':
     # class label of the graph with graph_id i
 
     with open('/home/jan/arxiv_lib/arxiv_graph_labels.txt', 'w') as file:
-        file.write('find a good graph name')
+        file.write('citation_graph')
