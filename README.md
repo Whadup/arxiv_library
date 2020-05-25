@@ -1,5 +1,52 @@
 # arxiv_library
 
+A library for extracting formulas from arXiv publications.
+
+## Usage
+To start the extraction you may call:
+
+```bash
+python pipeline.py </path/to/tar-archives> </path/to/output_dir>
+```
+</path/to/tar-archives> should contain the tar-archives with the raw data. A tar-archive is organized as follows:
+One tar arxiv (e. g. "arXiv_src_1503_007.tar") contains the sources for multiple papers from March 2015.
+The members of the tar-archive represents one publication and can be of three different types:
+
+- A single gzip compressed tex-file 
+- A tar.gz archive
+- A gzip compressed pdf
+   
+The pipeline extracts the archives and continues to process the retrieved papers.
+At the end of the pipeline we get a dictionary (paper-dict) for each paper that contains the formulas that could be extracted (in LaTeX and in MathML format),
+and some meta data like author, arXiv-category etc. The extracted formulas are organized section wise.
+
+The paper-dicts are stored in json-files in the </path/to/output_dir>. 
+
+## Architecture
+
+Pipeline modules:
+
+    PREPROCESSING	comments	    filedict -> filedict
+                    imports		    filedict -> paperdict {paper: str}
+
+	EXTRACTION      preamble	    paperdict -> paperdict {preamble: str, paper: str}
+                    sections	    paperdict -> paperdict {.. sections: [str]}
+                    equations	    paperdict -> paperdict {.. equations: [str]}
+                    citations	    paperdict -> paperdict {.. citations: [str (bibids)]}
+	
+	COMPILATION     dict to latex
+                    latex to mathml
+
+    IO_PKG          targz               archive -> filedict(s)
+                    json-store
+	                metadata            paperdict -> paperdict
+		
+
+-----------------------
+**filedict**: dict() of files in a paper directory with {relative path: filestring}
+
+**paperdict**: dict() with keys [paper, preamble, sections,  citations, metadata] for a single paper
+
 ## Usage of internal python functions
 
 #### tar-extraction:
@@ -43,40 +90,6 @@ paper_dict = extract_sections(paper_dict)
 paper_dict = extract_equations(paper_dict)
 paper_dict = extract_citations(paper_dict)
 ```
-## Architecture
-
-(API toplevel)
-
-pipeline
-
-call job 1
-
-call job 2
-..
-
-----------
-Pipeline modules:
-
-    PREPROCESSING	comments	    filedict -> filedict
-                    imports		    filedict -> paperdict {paper: str}
-
-	EXTRACTION      preamble	    paperdict -> paperdict {preamble: str, paper: str}
-                    sections	    paperdict -> paperdict {.. sections: [str]}
-                    equations	    paperdict -> paperdict {.. equations: [str]}
-                    citations	    paperdict -> paperdict {.. citations: [str (bibids)]}
-	
-	COMPILATION     dict to latex
-                    latex to mathml
-
-    IO_PKG          targz               archive -> filedict(s)
-                    json-store
-	                metadata            paperdict -> paperdict
-		
-
------------------------
-**filedict**: dict() of files in a paper directory with {relative path: filestring}
-
-**paperdict**: dict() with keys [paper, preamble, sections,  citations, metadata] for a single paper
 
 ## Dependencies
 For a list of required packages you may take a look at [setup.py](setup.py).
