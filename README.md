@@ -47,7 +47,7 @@ Pipeline modules:
 
 ## Usage of internal python functions
 
-#### tar-extraction:
+#### Extract tar
 You may retrieve all file_dicts for a tar archive with all papers from one month like this:
 
 ```python
@@ -58,7 +58,7 @@ for compressed_file_dict in process_tar("path/to/tar_archive"):
     # do something with the file dict
 ``` 
 
-#### tex-extraction
+#### Extract tex
 With the tex-extraction process we want extract the formulas from a paper. The paper is provided as a filedict.
 
 During this process we perform the following steps:
@@ -87,6 +87,27 @@ paper_dict = extract_preamble(paper_dict)
 paper_dict = extract_sections(paper_dict)
 paper_dict = extract_equations(paper_dict)
 paper_dict = extract_citations(paper_dict)
+# do something with the paper_dict
+```
+
+#### Compile to MathML
+To compile the extracted LaTeX-formulas to MathML you may use this code:
+```python
+import compilation 
+# Initially you will need the paper dict with the LaTeX-formulas that you want to compile.
+paper_dict = {"...": "..."} 
+paper_dict = compilation.mathml.compile_paper(paper_dict, paper_dict['arxiv_id'])
+# do something with the paper_dict
+```
+
+#### Retrieve meta data
+To retrieve the meta data for the publications by querying the arXiv-API you may use this code:
+```python
+import io_pkg
+# Initially you will need a list with all paper dicts for that you want to retrieve meta data
+paper_dicts = [...] 
+paper_dicts = io_pkg.metadata.receive_meta_data(paper_dicts)
+# do something with the paper_dicts
 ```
 
 ## Dependencies
