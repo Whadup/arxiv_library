@@ -96,8 +96,8 @@ if __name__ == '__main__':
     with open(os.path.join(args.dataset_path, 'arxiv_graph_labels.txt'), 'w') as file:
         file.write('citation_graph')
 
-    # DS_node_labels.txt (n lines): column vector of node labels, the value in the i-th line corresponds to the node
-    # with node_id i
+    # DS_node_attributes.txt (n lines): matrix of node attributes, the comma seperated values in the i-th line is the
+    # attribute vector of the node with node_id i
 
     with open(os.path.join(args.dataset_path, 'arxiv_node_attributes.txt'), 'w') as file:
         for i in range(graph.size()):
