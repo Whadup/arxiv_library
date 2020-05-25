@@ -22,8 +22,7 @@ def extract_equations(paper_dict):
             for match in re.finditer(env, section['latex']):
                 section['equations'].append({
                     'no': count,
-                    'latex': match.groups()[-1],
-                    'mathml': ''
+                    'latex': match.groups()[-1]
                 })
 
                 count += 1
