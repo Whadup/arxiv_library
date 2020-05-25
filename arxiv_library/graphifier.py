@@ -11,13 +11,13 @@ class Graph:
         self.directed = directed
 
         self.nodes = []  # i -> [neighbour indices of i]
-        self.attributes = []  # i -> arxiv_id
+        self.arxiv_ids = []  # i -> arxiv_id
         self.indices = {}  # arxiv_id -> i, fast check if id already exists
 
     def add(self, arxiv_id):
         if arxiv_id not in self.indices:
             self.nodes.append(set())
-            self.attributes.append(arxiv_id)
+            self.arxiv_ids.append(arxiv_id)
             self.indices[arxiv_id] = len(self.nodes) - 1
 
     def link(self, arxiv_id_a, arxiv_id_b):
@@ -101,4 +101,4 @@ if __name__ == '__main__':
 
     with open(os.path.join(args.dataset_path, 'arxiv_node_attributes.txt'), 'w') as file:
         for i in range(graph.size()):
-            file.write(graph.attributes[i] + '\n')
+            file.write(graph.arxiv_ids[i] + '\n')
