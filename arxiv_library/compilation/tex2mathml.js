@@ -77,27 +77,3 @@ stdin.on('end', function () {
         process.exit(0);//console.log('The data has been flushed');
     });
 });
-
-// try {
-//     var mml = katex.renderToString(argv._[0],
-//         {
-//             output:"mathml",
-//             throwOnError:true,
-//             strict:"ignore",
-//         });
-//     process.stdout.write(mml);
-//     process.stdout.write("\n");
-//     // '<span class="katex">...</span>'
-// } catch (e) {
-//     if (e instanceof katex.ParseError) {
-//         // KaTeX can't parse the expression
-//         html = ("Error in LaTeX:" + e.message)
-//             .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
-//         process.stderr.write(html);
-//         process.exit(1);
-//     } else {
-//         throw e;  // other error
-//         process.exit(1);
-//     }
-// }
-// process.exit(0);
