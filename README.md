@@ -111,4 +111,4 @@ paper_dicts = io_pkg.metadata.receive_meta_data(paper_dicts)
 ```
 
 ## Dependencies
-For a list of required packages you may take a look at [setup.py](setup.py).
+For a list of required packages you may take a look at [setup.py](setup.py) or the [requirements.txt](requirements.txt).
