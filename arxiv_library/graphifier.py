@@ -16,10 +16,8 @@ class Graph:
         if arxiv_id not in self.node_ids:
             self.nodes.append(set())
             self.arxiv_ids.append(arxiv_id)
-
-            index = len(self.nodes) - 1
-            self.node_ids[arxiv_id] = index
-            self.attributes[index] = {'arxiv_id': arxiv_id}
+            self.node_ids[arxiv_id] = len(self.nodes) - 1
+            self.attributes[len(self.nodes) - 1] = {'arxiv_id': arxiv_id}
 
     def link(self, arxiv_id_a, arxiv_id_b):
         index_a = self.node_ids[arxiv_id_a]
