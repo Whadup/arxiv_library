@@ -102,7 +102,7 @@ def call_js(paper_dict, paper_id=""):
         p, _ = os.path.split(__file__)
         # print(dict(preamble=preamble, latex_equations=latex_equations))
         result = subprocess.run(
-            ["js/tex2mathml.js"],
+            ["./tex2mathml.js"],
             input=json.dumps(
                 # dict(preamble=preamble, latex_equations=latex_equations)
                 paper_dict

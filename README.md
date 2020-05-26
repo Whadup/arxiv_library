@@ -72,8 +72,8 @@ During this process we perform the following steps:
 You may implement this pipeline with something like this:
 
 ```python
-from preprocessing.comments import remove_comments
-from preprocessing.imports import resolve_imports 
+from extraction.comments import remove_comments
+from extraction.imports import resolve_imports 
 from extraction.preamble import extract_preamble
 from extraction.sections import extract_sections 
 from extraction.equations import extract_equations

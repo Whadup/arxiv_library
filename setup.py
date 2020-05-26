@@ -10,8 +10,11 @@ setup(name='arxiv_library',
       packages=['arxiv_library',
                 'arxiv_library.compilation',
                 'arxiv_library.extraction',
-                'arxiv_library.io_pkg',
-                'arxiv_library.preprocessing'],
+                'arxiv_library.io_pkg'],
+      package_data={
+          "": ["*.js"],
+      },
+      scripts=['extract_formulas'],
       install_requires=['arxiv', 'ray', 'python-magic', 'chardet', 'psutil', 'tqdm'],
       zip_safe=False
       )

@@ -38,7 +38,7 @@ ENV PATH $CONDA_DIR/bin:$PATH
 
 # Install Node Modules
 RUN npm install -g yargs katex # mathjax-node mathjax-node-sre
-COPY arxiv_library/compilation/js/katex.js /usr/local/lib/node_modules/katex/dist/
+COPY arxiv_library/compilation/katex.js /usr/local/lib/node_modules/katex/dist/
 # Install Python Modules
 COPY environment.yml .
 RUN source $CONDA_DIR/bin/activate && conda env create -f environment.yml && rm environment.yml

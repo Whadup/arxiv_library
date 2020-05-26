@@ -6,8 +6,8 @@ import queue
 import logging
 import arxiv_library.io_pkg.targz as io_targz
 import arxiv_library.io_pkg.metadata as io_metadata
-import arxiv_library.preprocessing.comments as comments
-import arxiv_library.preprocessing.imports as imports
+import arxiv_library.extraction.comments as comments
+import arxiv_library.extraction.imports as imports
 import arxiv_library.extraction.preamble as preamble
 import arxiv_library.extraction.sections as sections
 import arxiv_library.extraction.equations as equations
