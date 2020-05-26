@@ -5,16 +5,10 @@ A library for extracting formulas from arXiv publications.
 ## Installation
 
 Download the repository from https://github.com/Whadup/arxiv_library. Set your current working directory to the
-root path of the repository folder where the setup.py file is located. Generate a pip module with 
+root path of the repository folder where the setup.py file is located. Install the module with 
 
 ```bash
-python setup.py sdist bdist_wheel
-```
-
-A directory /dist should be generated in the root folder. Install the module with:
-
-```bash
-pip install </path/to/dist/arxiv_library-0.1-py3-none-any.whl>
+pip install .
 ```
 
 Additionally the library requires Node.js and the node module katex to be installed. You can download Node.js at 
