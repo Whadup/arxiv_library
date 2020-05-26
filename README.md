@@ -17,7 +17,7 @@ https://nodejs.org/en/download/ and choose the respective installer for your os.
 npm install -g yargs katex
 ```
 
-installs the katex module.
+installs the katex module, once Node.js is installed.
 
 ## Usage
 If the module has been installed with pip, this command can be called from anywhere:
