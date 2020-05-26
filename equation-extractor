@@ -16,7 +16,7 @@ parser.add_argument(
     help='The directory where the resulting json files will be stored',
     type=str)
 parser.add_argument(
-    '-fulltext',
+    '--fulltext',
     help='Iff this flag is set, the paper will be stored in the paper dict with key "paper"',
     action='store_true')
 args = parser.parse_args()
