@@ -112,25 +112,3 @@ def pipeline(tar_dir, json_dir, fulltext=False):
             progress.update(1)
 
     ray.shutdown()
-
-
-if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description='This script extracts tar archives containing tar.gz files of arxiv'
-                                                 ' papers and generates a dictionary for each paper, containing '
-                                                 'citations, metadata and equations in latex and mathml format.')
-
-    parser.add_argument(
-        'tar_path',
-        help='The directory where the tar files are located',
-        type=str)
-    parser.add_argument(
-        'json_path',
-        help='The directory where the resulting json files will be stored',
-        type=str)
-    parser.add_argument(
-        '-fulltext',
-        help='Iff this flag is set, the paper will be stored in the paper dict with key "paper"',
-        action='store_true')
-
-    args = parser.parse_args()
-    pipeline(args.tar_path, args.json_path, args.fulltext)
