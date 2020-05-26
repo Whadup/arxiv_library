@@ -1,16 +1,15 @@
 import json
 import os
 import logging
-import preprocessing.comments
-import preprocessing.imports
-import extraction.preamble
-import extraction.sections
-import extraction.equations
-import extraction.citations
-import compilation.mathml
-import io_pkg.metadata
-import io_pkg.targz
-import io_pkg.paths
+import arxiv_library.io_pkg.targz as io_targz
+import arxiv_library.io_pkg.metadata as io_metadata
+import arxiv_library.preprocessing.comments as comments
+import arxiv_library.preprocessing.imports as imports
+import arxiv_library.extraction.preamble as preamble
+import arxiv_library.extraction.sections as sections
+import arxiv_library.extraction.equations as equations
+import arxiv_library.extraction.citations as citations
+import arxiv_library.compilation.mathml as mathml
 
 
 def pipeline(tar_dir, json_dir):
@@ -24,23 +23,23 @@ def pipeline(tar_dir, json_dir):
     paper_total = 0
 
     for tar_path in (os.path.join(tar_dir, p) for p in tar_paths):
-        targzs = io_pkg.targz.process_tar(tar_path)
+        targzs = io_targz.process_tar(tar_path)
 
         for i, targz in enumerate(targzs):
             paper_total += 1
 
             try:
-                file_dict = io_pkg.targz.process_gz(targz)
+                file_dict = io_targz.process_gz(targz)
 
-                file_dict = preprocessing.comments.remove_comments(file_dict)
-                paper_dict = preprocessing.imports.resolve_imports(file_dict)
+                file_dict = comments.remove_comments(file_dict)
+                paper_dict = imports.resolve_imports(file_dict)
 
-                paper_dict = extraction.preamble.extract_preamble(paper_dict)
-                paper_dict = extraction.sections.extract_sections(paper_dict)
-                paper_dict = extraction.equations.extract_equations(paper_dict)
-                paper_dict = extraction.citations.extract_citations(paper_dict)
+                paper_dict = preamble.extract_preamble(paper_dict)
+                paper_dict = sections.extract_sections(paper_dict)
+                paper_dict = equations.extract_equations(paper_dict)
+                paper_dict = citations.extract_citations(paper_dict)
 
-                paper_dict = compilation.mathml.compile_paper(paper_dict, paper_dict['arxiv_id'])
+                paper_dict = mathml.compile_paper(paper_dict, paper_dict['arxiv_id'])
 
                 # debug start
                 for section in paper_dict['sections']:
@@ -54,7 +53,7 @@ def pipeline(tar_dir, json_dir):
                 cache.append(paper_dict)
 
                 if len(cache) > 100 or i == len(targzs) - 1:
-                    paper_dicts = io_pkg.metadata.receive_meta_data(cache)
+                    paper_dicts = io_metadata.receive_meta_data(cache)
 
                     # debug start
                     for pd in paper_dicts:

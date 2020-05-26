@@ -4,16 +4,15 @@ import os
 import threading
 import queue
 import logging
-import io_pkg.targz
-import io_pkg.metadata
-import io_pkg.paths
-import preprocessing.comments
-import preprocessing.imports
-import extraction.preamble
-import extraction.sections
-import extraction.equations
-import extraction.citations
-import compilation.mathml
+import arxiv_library.io_pkg.targz as io_targz
+import arxiv_library.io_pkg.metadata as io_metadata
+import arxiv_library.preprocessing.comments as comments
+import arxiv_library.preprocessing.imports as imports
+import arxiv_library.extraction.preamble as preamble
+import arxiv_library.extraction.sections as sections
+import arxiv_library.extraction.equations as equations
+import arxiv_library.extraction.citations as citations
+import arxiv_library.compilation.mathml as mathml
 
 
 _pipeline_input_queue = queue.Queue(maxsize=200)
@@ -26,8 +25,8 @@ _pipeline_finished = threading.Event()
 @ray.remote
 def _extraction_process(targz):
     try:
-        return io_pkg.targz.process_gz(targz)
-    except io_pkg.targz.EmptyFileDictException as exception:
+        return targz.process_gz(targz)
+    except targz.EmptyFileDictException as exception:
         logging.debug(exception)
     except Exception as exception:
         logging.warning(exception)
@@ -36,18 +35,18 @@ def _extraction_process(targz):
 @ray.remote
 def _pipeline_process(file_dict_id):
     try:
-        file_dict = preprocessing.comments.remove_comments(file_dict_id)
-        paper_dict = preprocessing.imports.resolve_imports(file_dict)
+        file_dict = comments.remove_comments(file_dict_id)
+        paper_dict = imports.resolve_imports(file_dict)
 
-        paper_dict = extraction.preamble.extract_preamble(paper_dict)
-        paper_dict = extraction.sections.extract_sections(paper_dict)
-        paper_dict = extraction.equations.extract_equations(paper_dict)
-        paper_dict = extraction.citations.extract_citations(paper_dict)
+        paper_dict = preamble.extract_preamble(paper_dict)
+        paper_dict = sections.extract_sections(paper_dict)
+        paper_dict = equations.extract_equations(paper_dict)
+        paper_dict = citations.extract_citations(paper_dict)
 
-        paper_dict = compilation.mathml.compile_paper(paper_dict, paper_dict['arxiv_id'])
+        paper_dict = mathml.compile_paper(paper_dict, paper_dict['arxiv_id'])
 
         return paper_dict
-    except preprocessing.imports.NoMainFileException as exception:
+    except imports.NoMainFileException as exception:
         logging.debug(exception)
     except Exception as exception:
         logging.warning(exception)
@@ -68,7 +67,7 @@ def _extraction_thread(tar_dir):
     remaining_file_dict_ids = []
 
     for tar_path in (os.path.join(tar_dir, p) for p in tar_paths):
-        for targz in io_pkg.targz.process_tar(tar_path):
+        for targz in io_targz.process_tar(tar_path):
             remaining_file_dict_ids.append(_extraction_process.remote(targz))
 
     while remaining_file_dict_ids:
