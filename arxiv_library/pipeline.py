@@ -74,7 +74,11 @@ def _pipeline(file_dicts, json_dir, fulltext):
 
 def pipeline(tar_dir, json_dir, fulltext=False):
     """
-    Extracts all tar files in a folder
+    Extracts all tar files in a folder and generates corresponding paper dictionaries with keys sections, metadata,
+    arxiv_id, citations and preamble. For information on the dictionary structure please read the README file. These
+    files will be stored as json at the target directory. If fulltext is set to True, sections have another key latex,
+    where the fulltext for each section is stored, and the paper dictionary has an additional key paper where the full
+    paper is stored.
     :param tar_dir: The directory where the tar files are located
     :param json_dir: The directory where the json files should be saved
     :param fulltext: Iff true, the paper will be stored in the paper dict with key 'paper'; default=False
