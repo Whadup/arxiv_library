@@ -2,11 +2,28 @@
 
 A library for extracting formulas from arXiv publications.
 
-## Usage
-To start the extraction you may call:
+## Installation
+
+Download the .whl file and install the module with pip (the .whl file name might differ).
 
 ```bash
-python pipeline.py </path/to/tar-archives> </path/to/output_dir>
+pip install </path/to/wheel/arxiv_library-0.1-py3-none-any.whl>
+```
+
+Additionally the library requires Node.js and the node module katex to be installed. You can download Node.js at 
+https://nodejs.org/en/download/ and choose the respective installer for your os. The command
+
+ ```bash
+npm install -g yargs katex
+```
+
+installs the katex module.
+
+## Usage
+If the module has been installed with pip, this command can be called from anywhere:
+
+```bash
+equation-extractor </path/to/tar-archives> </path/to/output_dir>
 ```
 </path/to/tar-archives> should contain the tar-archives with the raw data. A tar-archive is organized as follows:
 One tar arxiv (e. g. "arXiv_src_1503_007.tar") contains the sources for multiple papers from March 2015.
@@ -26,10 +43,9 @@ The paper-dicts are stored in json-files in the </path/to/output_dir>.
 
 Pipeline modules:
 
-    PREPROCESSING	comments	    filedict -> filedict
+	EXTRACTION      comments	    filedict -> filedict
                     imports		    filedict -> paperdict {paper: str}
-
-	EXTRACTION      preamble	    paperdict -> paperdict {preamble: str, paper: str}
+                    preamble	    paperdict -> paperdict {preamble: str, paper: str}
                     sections	    paperdict -> paperdict {.. sections: list}
                     equations	    paperdict -> paperdict {.. sections: {latex: str, equations: [equation: {no: int, latex: str}]}}
                     citations	    paperdict -> paperdict {.. citations: [str (arxiv id)]}
@@ -41,7 +57,7 @@ Pipeline modules:
 		
 
 -----------------------
-**filedict**: dict() of files in a paper directory with {relative path: filestring}
+**filedict**: dict() of files in a paper directory with {relative path: filestring, arxiv_id: str}
 
 **paperdict**: dict() with keys [paper, preamble, sections,  citations, metadata] for a single paper
 
