@@ -4,10 +4,17 @@ A library for extracting formulas from arXiv publications.
 
 ## Installation
 
-Download the .whl file and install the module with pip (the .whl file name might differ).
+Download the repository from https://github.com/Whadup/arxiv_library. Set your current working directory to the
+root path of the repository folder where the setup.py file is located. Generate a pip module with 
 
 ```bash
-pip install </path/to/wheel/arxiv_library-0.1-py3-none-any.whl>
+python setup.py sdist bdist_wheel
+```
+
+A directory /dist should be generated in the root folder. Install the module with:
+
+```bash
+pip install </path/to/dist/arxiv_library-0.1-py3-none-any.whl>
 ```
 
 Additionally the library requires Node.js and the node module katex to be installed. You can download Node.js at 
@@ -20,7 +27,8 @@ npm install -g yargs katex
 installs the katex module, once Node.js is installed.
 
 ## Usage
-If the module has been installed with pip, this command can be called from anywhere:
+If the module has been installed with pip, you can import the module like any other python module. Also 
+this shell command can be called from anywhere:
 
 ```bash
 equation-extractor </path/to/tar-archives> </path/to/output_dir>
