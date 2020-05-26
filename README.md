@@ -25,7 +25,7 @@ If the module has been installed with pip, you can import the module like any ot
 this shell command can be called from anywhere:
 
 ```bash
-equation-extractor </path/to/tar-archives> </path/to/output_dir>
+equation-extractor </path/to/tar-archives> </path/to/output_dir> [--fulltext]
 ```
 </path/to/tar-archives> should contain the tar-archives with the raw data. A tar-archive is organized as follows:
 One tar arxiv (e. g. "arXiv_src_1503_007.tar") contains the sources for multiple papers from March 2015.
@@ -40,6 +40,8 @@ At the end of the pipeline we get a dictionary (paper-dict) for each paper that 
 and some meta data like author, arXiv-category etc. The extracted formulas are organized section wise.
 
 The paper-dicts are stored in json-files in the </path/to/output_dir>. 
+
+--fulltext is an optional flag. If this flag is set, the paper's content will be stored in the paper dict with key "paper".
 
 ## Architecture
 
@@ -69,10 +71,10 @@ Pipeline modules:
 You may retrieve all file_dicts for a tar archive with all papers from one month like this:
 
 ```python
-from io_pkg.targz import process_gz, process_tar 
+import arxiv_library.io_pkg.targz as io_targz
 
-for compressed_file_dict in process_tar("path/to/tar_archive"):
-    file_dict = process_gz(compressed_file_dict)
+for compressed_file_dict in io_targz.process_tar("path/to/tar_archive"):
+    file_dict = io_targz.process_gz(compressed_file_dict)
     # do something with the file dict
 ``` 
 
@@ -90,41 +92,41 @@ During this process we perform the following steps:
 You may implement this pipeline with something like this:
 
 ```python
-from extraction.comments import remove_comments
-from extraction.imports import resolve_imports 
-from extraction.preamble import extract_preamble
-from extraction.sections import extract_sections 
-from extraction.equations import extract_equations
-from extraction.citations import extract_citations
+import arxiv_library.extraction.comments as comments
+import arxiv_library.extraction.imports as imports
+import arxiv_library.extraction.preamble as preamble
+import arxiv_library.extraction.sections as sections
+import arxiv_library.extraction.equations as equations
+import arxiv_library.extraction.citations as citations
 
 # Initially you need a filedict from the tar-extraction
 file_dict = {"..." : "..."}
-file_dict = remove_comments(file_dict)
-paper_dict = resolve_imports(file_dict)
-paper_dict = extract_preamble(paper_dict)
-paper_dict = extract_sections(paper_dict)
-paper_dict = extract_equations(paper_dict)
-paper_dict = extract_citations(paper_dict)
+file_dict = comments.remove_comments(file_dict)
+paper_dict = imports.resolve_imports(file_dict)
+paper_dict = preamble.extract_preamble(paper_dict)
+paper_dict = sections.extract_sections(paper_dict)
+paper_dict = equations.extract_equations(paper_dict)
+paper_dict = citations.extract_citations(paper_dict)
 # do something with the paper_dict
 ```
 
 #### Compile to MathML
 To compile the extracted LaTeX-formulas to MathML you may use this code:
 ```python
-import compilation 
+import arxiv_library.compilation.mathml as mathml
 # Initially you will need the paper dict with the LaTeX-formulas that you want to compile.
 paper_dict = {"...": "..."} 
-paper_dict = compilation.mathml.compile_paper(paper_dict, paper_dict['arxiv_id'])
+paper_dict = mathml.compile_paper(paper_dict, paper_dict['arxiv_id'])
 # do something with the paper_dict
 ```
 
 #### Retrieve meta data
 To retrieve the meta data for the publications by querying the arXiv-API you may use this code:
 ```python
-import io_pkg
+import arxiv_library.io_pkg.metadata as metadata
 # Initially you will need a list with all paper dicts for that you want to retrieve meta data
 paper_dicts = [...] 
-paper_dicts = io_pkg.metadata.receive_meta_data(paper_dicts)
+paper_dicts = metadata.receive_meta_data(paper_dicts)
 # do something with the paper_dicts
 ```
 
