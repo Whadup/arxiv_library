@@ -74,6 +74,13 @@ def _pipeline(file_dicts, json_dir, fulltext):
 
 
 def pipeline(tar_dir, json_dir, fulltext=False):
+    """
+    Extracts all tar files in a folder
+    :param tar_dir: The directory where the tar files are located
+    :param json_dir: The directory where the json files should be saved
+    :param fulltext: Iff true, the paper will be stored in the paper dict with key 'paper'; default=False
+    """
+
     ray.init(log_to_driver=True)
     tar_paths = os.listdir(tar_dir)
     total_papers = 0
