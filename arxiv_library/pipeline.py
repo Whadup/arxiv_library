@@ -5,16 +5,15 @@ import logging
 import argparse
 import psutil
 import tqdm
-import io_pkg.targz
-import io_pkg.metadata
-import io_pkg.paths
-import preprocessing.comments
-import preprocessing.imports
-import extraction.preamble
-import extraction.sections
-import extraction.equations
-import extraction.citations
-import compilation.mathml
+import arxiv_library.io_pkg.targz as io_targz
+import arxiv_library.io_pkg.metadata as io_metadata
+import arxiv_library.preprocessing.comments as comments
+import arxiv_library.preprocessing.imports as imports
+import arxiv_library.extraction.preamble as preamble
+import arxiv_library.extraction.sections as sections
+import arxiv_library.extraction.equations as equations
+import arxiv_library.extraction.citations as citations
+import arxiv_library.compilation.mathml as mathml
 
 
 @ray.remote(num_cpus=1)
@@ -23,9 +22,9 @@ def _extract(targzs):
 
     for gz in targzs:
         try:
-            processed.append(io_pkg.targz.process_gz(gz))
+            processed.append(io_targz.process_gz(gz))
 
-        except io_pkg.targz.EmptyFileDictException as exception:
+        except io_targz.EmptyFileDictException as exception:
             logging.debug(exception)
 
         except Exception as exception:
@@ -40,30 +39,30 @@ def _pipeline(file_dicts, json_dir, fulltext):
 
     for file_dict in file_dicts:
         try:
-            file_dict = preprocessing.comments.remove_comments(file_dict)
-            paper_dict = preprocessing.imports.resolve_imports(file_dict)
+            file_dict = comments.remove_comments(file_dict)
+            paper_dict = imports.resolve_imports(file_dict)
 
-            paper_dict = extraction.preamble.extract_preamble(paper_dict)
-            paper_dict = extraction.sections.extract_sections(paper_dict)
-            paper_dict = extraction.equations.extract_equations(paper_dict)
-            paper_dict = extraction.citations.extract_citations(paper_dict)
+            paper_dict = preamble.extract_preamble(paper_dict)
+            paper_dict = sections.extract_sections(paper_dict)
+            paper_dict = equations.extract_equations(paper_dict)
+            paper_dict = citations.extract_citations(paper_dict)
 
             if not fulltext:
                 del paper_dict['paper']
                 for section in paper_dict['sections']:
                     del section['latex']
 
-            paper_dict = compilation.mathml.compile_paper(paper_dict, paper_dict['arxiv_id'])
+            paper_dict = mathml.compile_paper(paper_dict, paper_dict['arxiv_id'])
             paper_dicts.append(paper_dict)
 
-        except preprocessing.imports.NoMainFileException as exception:
+        except imports.NoMainFileException as exception:
             logging.debug(exception)
 
         except Exception as exception:
             logging.warning(exception)
 
     try:
-        paper_dicts = io_pkg.metadata.receive_meta_data(paper_dicts)
+        paper_dicts = io_metadata.receive_meta_data(paper_dicts)
 
         for paper_dict in paper_dicts:
             with open(os.path.join(json_dir, '{}.json'.format(paper_dict['arxiv_id'])), 'w') as file:
@@ -87,7 +86,7 @@ def pipeline(tar_dir, json_dir, fulltext=False):
 
     with tqdm.tqdm(total=len(tar_paths), desc='0 papers in total | tar progress') as progress:
         for tar_path in (os.path.join(tar_dir, p) for p in tar_paths):
-            targzs = io_pkg.targz.process_tar(tar_path)
+            targzs = io_targz.process_tar(tar_path)
             chunk_size = max(len(targzs) // (psutil.cpu_count()), 1)
 
             remaining_chunk_ids = []

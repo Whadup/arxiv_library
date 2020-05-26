@@ -1,4 +1,4 @@
-from setuptools import setup
+from setuptools import setup, find_packages
 
 setup(name='arxiv_library',
       version='0.1',
@@ -7,7 +7,11 @@ setup(name='arxiv_library',
       author=u'Lukas Pfahler, Jonathan Schill, Jan Richter',
       author_email='{lukas.pfahler, jonathan.schill, jan-philip.richter}@tu-dortmund.de',
       license='MIT',
-      packages=['arxiv_library'],
+      packages=['arxiv_library',
+                'arxiv_library.compilation',
+                'arxiv_library.extraction',
+                'arxiv_library.io_pkg',
+                'arxiv_library.preprocessing'],
       install_requires=['arxiv', 'ray', 'python-magic', 'chardet', 'psutil', 'tqdm'],
       zip_safe=False
       )
