@@ -1,6 +1,6 @@
 # arxiv_library
 
-A library for extracting formulas from arXiv publications.
+A library for extracting mathematical expressions from arXiv publications.
 
 ## Installation
 
