@@ -8,7 +8,9 @@ Download the repository from https://github.com/Whadup/arxiv_library. Set your c
 root path of the repository folder where the setup.py file is located. Install the module with 
 
 ```bash
-pip install . --user
+git clone https://github.com/Whadup/arxiv_library
+cd arxiv_library
+pip install .
 ```
 
 Additionally the library requires Node.js and the node module katex to be installed. You can download Node.js at 
