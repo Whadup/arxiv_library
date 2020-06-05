@@ -2,3 +2,11 @@ __pycache__/
 *.pyc
 arxiv_library.egg-info/
 .vscode/settings.json
+.idea/*
+venv/*
+arxiv_library/io_pkg/path_config.json
+test/src_tar_test*
+*.log
+arxiv_library/my_test.py
+arxiv_library/1tar.py
+arxiv_library/io_pkg/encodings.txt

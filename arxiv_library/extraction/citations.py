@@ -1,13 +1,9 @@
-"""Funcitonality for parsing the bibliography section of a latex document (either in the
-main document or in a separate .bbl), identify the bibitems and extracting all arxiv ids in
-standard form"""
 import re
-BIBBLIOGRAPHY_BEGIN_RE = re.compile(r"\\begin{thebibliography}(\{[0-9]*\})?")
-BIBBLIOGRAPHY_END_RE = re.compile(r"\\end{thebibliography}")
-BIBITEM_RE = re.compile(r"\\bibitem(?:\[[^\]]*\])?\{[^\}]*\}")
 
-ARXIV_NEW_ID = re.compile(r"(?P<id>[0-9]{4}[.]+[0-9]{4,5})(?P<version>v[0-9]+)?")
-ARXIV_OLD_IDS = [r"astro\-ph(?P<slashseparator>[. /]+)[0-9]{7}(?P<version>v[0-9]+)?",
+_latex_bibitem = re.compile(r'\\bibitem(?:\[[^\]]*\])?\{[^\}]*\}')
+
+_arxiv_id_new = re.compile(r"(?P<id>[0-9]{4}[.]+[0-9]{4,5})(?P<version>v[0-9]+)?")
+_arxiv_ids_old = [r"astro\-ph(?P<slashseparator>[. /]+)[0-9]{7}(?P<version>v[0-9]+)?",
     r"astro\-ph(?P<dotseparator>[. -]+)(GA|CO|EP|HE|IM|SR)(?P<slashseparator>[. /]+)[0-9]{7}(?P<version>v[0-9]+)?",
     r"cond\-mat(?P<slashseparator>[. /]+)[0-9]{7}(?P<version>v[0-9]+)?",
     r"cond\-mat(?P<dotseparator>[. -]+)(dis\-nn|mtrl\-sci|mes\-hall|other|quant\-gas|soft|stat\-mech|str\-el|supr\-con)(?P<slashseparator>[. /]+)[0-9]{7}(?P<version>v[0-9]+)?",
@@ -33,71 +29,58 @@ ARXIV_OLD_IDS = [r"astro\-ph(?P<slashseparator>[. /]+)[0-9]{7}(?P<version>v[0-9]
     r"eess(AS|IV|SP|SY)(?P<slashseparator>[. /]+)[0-9]{7}(?P<version>v[0-9]+)?",
     r"econ(?P<slashseparator>[. /]+)[0-9]{7}(?P<version>v[0-9]+)?",
     r"econ(?P<dotseparator>[. -]+)(EM|GN|TH)(?P<slashseparator>[. /]+)[0-9]{7}(?P<version>v[0-9]+)?"
-    ]
-ARXIV_OLD_FILENAMES = [reg.replace(r"(?P<slashseparator>[. /]+)", "").replace(r"(?P<version>v[0-9]+)?", "") for reg in ARXIV_OLD_IDS]
-ARXIV_OLD_FILENAMES = [re.compile(reg) for reg in ARXIV_OLD_FILENAMES]
-ARXIV_OLD_IDS = [re.compile(reg) for reg in ARXIV_OLD_IDS]
+]
+_arxiv_ids_old = [re.compile(regex) for regex in _arxiv_ids_old]
 
-def normalize_filename_to_arxiv_id(arxiv_filename):
-    """Convert a filename used in the arxiv dump to id format"""
-    match = ARXIV_NEW_ID.match(arxiv_filename)
+
+def extract_citations(paper_dict):
+    tex_string = paper_dict['paper']
+    bib_items = _latex_bibitem.split(tex_string)
+    bib_ids = set()
+
+    for item in bib_items:
+        match = _arxiv_id_new.search(item)
+
+        if not match:
+            for regex in _arxiv_ids_old:
+                match = regex.search(item)
+
+                if match is not None:
+                    break
+
+        if match is not None:
+            bib_ids.add(match.group(0))
+
+    paper_dict['citations'] = []
+
+    for bib_id in list(bib_ids):
+        normalized = _normalize_arxiv_id(bib_id)
+
+        if normalized:
+            paper_dict['citations'].append(normalized)
+
+    return paper_dict
+
+
+def _normalize_arxiv_id(arxiv_id):
+    """Normalize an arxiv id by using consistent seperators (slash and dot) and by dropping the version tag."""
+
+    match = _arxiv_id_new.match(arxiv_id)
+
     if match:
         return match.group("id")
-    for r in ARXIV_OLD_FILENAMES:
-        match = r.match(arxiv_filename)
-        if match:
-            # print(match.group())
-            return match.group()[:-7]+ "/" + match.group()[-7:]
-    return None
 
-def normalize_arxiv_id(arxiv_id):
-    """Normalize an arxiv id by using consistent seperators (slash and dot) and
-    by dropping the version tag"""
-    match = ARXIV_NEW_ID.match(arxiv_id)
-    if match:
-        return match.group("id")
-    for r in ARXIV_OLD_IDS:
+    for r in _arxiv_ids_old:
         match = r.search(arxiv_id)
         if match:
             groups = match.groupdict()
-            # print(groups)
+
             if "version" in groups:
                 arxiv_id = arxiv_id[:match.start("version")]
             if "slashseparator" in groups:
                 arxiv_id = arxiv_id[:match.start("slashseparator")] + "/" + arxiv_id[match.end("slashseparator"):]
             if "dotseparator" in groups:
                 arxiv_id = arxiv_id[:match.start("dotseparator")] + "." + arxiv_id[match.end("dotseparator"):]
+
             return arxiv_id
-    return None
-
-def check_ids(bibitems):
-    """Identify Arxiv IDs in a bibitem string"""
-    all_matches = set()
-    for bibitem in bibitems:
-        match = ARXIV_NEW_ID.search(bibitem)
-        if match:
-            #print(match)
-            all_matches.add(match.group("id"))
-        else:
-            for r in ARXIV_OLD_IDS:
-                match = r.search(bibitem)
-                if match:
-                    all_matches.add(match.group(0))
-                    break
-    return list(all_matches)
-
-def parse(tex_doc):
-    """ Searches for bibitems with arxiv-id in a given tex string
-    and returns a generator which yields all the retrieved
-    ids
-    """
-    start = BIBBLIOGRAPHY_BEGIN_RE.search(tex_doc)
-    end = BIBBLIOGRAPHY_END_RE.search(tex_doc)
-    if start is not None and end is not None:
-        start = start.end()
-        end = end.start()
-        bibliography = tex_doc[start:end]
-        bib_items = BIBITEM_RE.split(bibliography)
-        arxiv_ids = check_ids(bib_items)
-        return arxiv_ids
     return None

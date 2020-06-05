@@ -1,0 +1,7 @@
+arxiv==0.5.3
+psutil==5.7.0
+python-magic==0.4.18
+ray==0.8.5
+tqdm==4.46.0
+
+setuptools~=46.2.0

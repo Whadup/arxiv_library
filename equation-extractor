@@ -1,0 +1,23 @@
+#!/usr/bin/env python
+import argparse
+import arxiv_library.pipeline
+import arxiv_library.logo
+
+parser = argparse.ArgumentParser(description='This script extracts tar archives containing tar.gz files of arxiv'
+                                             'papers and generates a dictionary for each paper, containing '
+                                             'citations, metadata and equations in latex and mathml format.')
+parser.add_argument(
+    'tar_path',
+    help='The directory where the tar files are located',
+    type=str)
+parser.add_argument(
+    'json_path',
+    help='The directory where the resulting json files will be stored',
+    type=str)
+parser.add_argument(
+    '--fulltext',
+    help='Iff this flag is set, the paper will be stored in the paper dict with key "paper"',
+    action='store_true')
+args = parser.parse_args()
+arxiv_library.logo.print_logo()
+arxiv_library.pipeline.pipeline(args.tar_path, args.json_path, args.fulltext)

@@ -70,6 +70,7 @@ def format_def(preamble_entry):
     else:
         return preamble_entry
 
+
 def substitute_from_dict(preamble_entry, sub_dict):
     for key, value in sub_dict.items():
         preamble_entry = preamble_entry.replace(key, value)
@@ -79,6 +80,7 @@ def substitute_from_dict(preamble_entry, sub_dict):
 
     return preamble_entry
 
+
 def prepare_js_json(paper_dict):
     preamble = paper_dict['preamble']
     preamble_lines = clean_preamble(preamble)
@@ -86,11 +88,12 @@ def prepare_js_json(paper_dict):
     paper_dict["preamble"] = paper_dict["preamble"].replace("\\newcommand*", "\\newcommand") # TODO: why?
     for sec in paper_dict["sections"]:
         for eq in sec["equations"]:
-            # eq['latex'] = substitute_from_dict(eq["latex"], LATEX_SUBS)
-            # if '&' in eq or r'\n' in repr(eq):
-            #     eq["latex"] = r"\begin{aligned}" + eq['latex'] + r"\end{aligned}"
-            eq['latex'] = r"\begin{aligned}" + substitute_from_dict(eq["latex"], LATEX_SUBS) + r"\end{aligned}"
+            eq['latex'] = substitute_from_dict(eq["latex"], LATEX_SUBS)
+            if '&' in eq or r'\n' in repr(eq):
+                eq["latex"] = r"\begin{aligned}" + eq['latex'] + r"\end{aligned}"
+            # eq['latex'] = r"\begin{aligned}" + substitute_from_dict(eq["latex"], LATEX_SUBS) + r"\end{aligned}"
     return paper_dict
+
 
 def call_js(paper_dict, paper_id=""):
     try:
@@ -99,7 +102,7 @@ def call_js(paper_dict, paper_id=""):
         p, _ = os.path.split(__file__)
         # print(dict(preamble=preamble, latex_equations=latex_equations))
         result = subprocess.run(
-            ["js/tex2mathml.js"],
+            ["./tex2mathml.js"],
             input=json.dumps(
                 # dict(preamble=preamble, latex_equations=latex_equations)
                 paper_dict
@@ -111,16 +114,16 @@ def call_js(paper_dict, paper_id=""):
             timeout=120
         )
         if result.stderr:
-            logging.warning(result.stderr)
-        # print(result.stdout)
-        # print(result.stderr)
+            if "Error in LaTeX:KaTeX parse error" in result.stderr:
+                logging.debug("Compilation failed: {}".format(result.stderr))
+            else:
+                logging.warning("Unexpected error in tex2mathml.js (Arxiv ID: {}):".format(paper_dict["arxiv_id"]) + result.stderr)
         result = json.loads(result.stdout)
         result["preamble"] = result["preamble"].split("\n")
         return result
     except subprocess.TimeoutExpired:
         logging.warning("Timeout for paper {}: \n".format(paper_id) + "\n")
         return False
-
 
 
 def clean_preamble(preamble):
@@ -137,6 +140,7 @@ def compile_paper(paper_dict, paper_id="<string>"):
     paper_dict = call_js(paper_dict, paper_id=paper_id)
     return paper_dict
 
+
 def compile_string(latex):
     """Use the same compilation pipeline to compile a string"""
     paper_dict = {
@@ -149,6 +153,7 @@ def compile_string(latex):
     if mml:
         return annotation_re.sub("", mml)
     return None
+
 
 if __name__ == "__main__":
     FILE_PATH = "/mathml/1703.08475.json"

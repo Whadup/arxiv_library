@@ -7,8 +7,14 @@ setup(name='arxiv_library',
       author=u'Lukas Pfahler, Jonathan Schill, Jan Richter',
       author_email='{lukas.pfahler, jonathan.schill, jan-philip.richter}@tu-dortmund.de',
       license='MIT',
-      packages=find_packages(),
-      install_requires=['arxiv', 'tqdm'],
-      zip_safe=False,
-      include_package_data=True,
-)
+      packages=['arxiv_library',
+                'arxiv_library.compilation',
+                'arxiv_library.extraction',
+                'arxiv_library.io_pkg'],
+      package_data={
+          "": ["*.js", "logo.txt"]
+      },
+      scripts=['equation-extractor'],
+      install_requires=['arxiv', 'ray', 'python-magic', 'chardet', 'psutil', 'tqdm'],
+      zip_safe=False
+      )
