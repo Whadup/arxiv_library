@@ -51,5 +51,36 @@ def extract_citations(paper_dict):
         if match is not None:
             bib_ids.add(match.group(0))
 
-    paper_dict['citations'] = list(bib_ids)
+    paper_dict['citations'] = []
+
+    for bib_id in list(bib_ids):
+        normalized = _normalize_arxiv_id(bib_id)
+
+        if normalized:
+            paper_dict['citations'].append(normalized)
+
     return paper_dict
+
+
+def _normalize_arxiv_id(arxiv_id):
+    """Normalize an arxiv id by using consistent seperators (slash and dot) and by dropping the version tag."""
+
+    match = _arxiv_id_new.match(arxiv_id)
+
+    if match:
+        return match.group("id")
+
+    for r in _arxiv_ids_old:
+        match = r.search(arxiv_id)
+        if match:
+            groups = match.groupdict()
+
+            if "version" in groups:
+                arxiv_id = arxiv_id[:match.start("version")]
+            if "slashseparator" in groups:
+                arxiv_id = arxiv_id[:match.start("slashseparator")] + "/" + arxiv_id[match.end("slashseparator"):]
+            if "dotseparator" in groups:
+                arxiv_id = arxiv_id[:match.start("dotseparator")] + "." + arxiv_id[match.end("dotseparator"):]
+
+            return arxiv_id
+    return None
