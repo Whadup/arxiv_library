@@ -22,7 +22,7 @@ def count(json_dir):
             for section in paper_dict['sections']:
                 for eq in section['equations']:
                     latex_count += 1 if eq['latex'] else 0
-                    mathml_count += 1 if eq['mathml'] else 0
+                    mathml_count += 1 if eq.get('mathml') else 0
 
             latex_sum += latex_count
             mathml_sum += mathml_count
