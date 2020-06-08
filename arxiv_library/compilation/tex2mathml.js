@@ -31,6 +31,8 @@ var stdin = process.stdin,
     stderr = process.stderr,
     inputChunks = [];
 
+const annotation_regex = /<annotation.*>(.|\s)*<\/annotation>/;
+
 stdin.resume();
 stdin.setEncoding('utf8');
 
@@ -57,6 +59,7 @@ stdin.on('end', function () {
                         throwOnError:true,
                         strict:"ignore",
                     });
+                mml = mml.replace(annotation_regex, '')
                 parsedData.sections[i].equations[j].mathml = mml;
                 // process.stdout.write("\n");
                 // '<span class="katex">...</span>'
