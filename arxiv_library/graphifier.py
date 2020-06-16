@@ -2,6 +2,7 @@ import os
 import tqdm
 import json
 import argparse
+import logging
 
 
 class Graph:
@@ -166,11 +167,16 @@ def save(graph, dataset_path):
 
 
 if __name__ == '__main__':
+    logging.basicConfig(filename='/home/richter2/pipeline.log', filemode='w')
+
     parser = argparse.ArgumentParser(description='Builds a dataset from json paper dict files, for reference see'
                                                  'https://chrsmrrs.github.io/datasets/docs/format/.')
     parser.add_argument('json_path', help='The directory where the json files are located', type=str)
     parser.add_argument('dataset_path', help='The directory where the dataset will be stored', type=str)
     args = parser.parse_args()
 
-    ds_graph = build(args.json_path)
-    save(ds_graph, args.dataset_path)
+    try:
+        ds_graph = build(args.json_path)
+        save(ds_graph, args.dataset_path)
+    except Exception as e:
+        logging.exception(e)
