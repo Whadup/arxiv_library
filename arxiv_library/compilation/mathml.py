@@ -12,7 +12,7 @@ annotation_re = re.compile(r'<annotation.*</annotation>', re.DOTALL)
 # the right format for KaTeX. See the function format_def
 def_re = re.compile(r"(\\def\s?\\(\w|\s)*)(\[#1\])")
 # Use this process only when this var is True
-EXPERIMENTAL = False 
+EXPERIMENTAL = False
 
 # Macros that often cause problems, but have no semantic efect for the formula, are redefiened so that they do nothing.
 PREAMBLE_HOTFIX = [
@@ -50,15 +50,15 @@ PREAMBLE_HOTFIX = [
     r"\newcommand{\E}{\mathbb{E}}"
 ]
 
-PREAMBLE_SUBS  = {
-        r"\boldmath" : r"\bf",
-        r"\DeclareMathOperator" : r"\newcommand"
-        }
+PREAMBLE_SUBS = {
+    r"\boldmath": r"\bf",
+    r"\DeclareMathOperator": r"\newcommand"
+}
 
 LATEX_SUBS = {
-        r"\begin{split}" : "",
-        r"\end{split}" : ""
-        }
+    r"\begin{split}": "",
+    r"\end{split}": ""
+}
 
 
 def format_def(preamble_entry):
@@ -66,7 +66,7 @@ def format_def(preamble_entry):
     if match:
         residual = def_re.sub("", preamble_entry)
         groups = match.groups()
-        return groups[0] + "#1"+ residual
+        return groups[0] + "#1" + residual
     else:
         return preamble_entry
 
@@ -81,17 +81,33 @@ def substitute_from_dict(preamble_entry, sub_dict):
     return preamble_entry
 
 
+def clean_preamble(preamble):
+    preamble = [substitute_from_dict(preamble_entry, PREAMBLE_SUBS) for preamble_entry in preamble]
+    full_preamble = PREAMBLE_HOTFIX + preamble
+    preamble_lines = "\n".join(full_preamble)
+    return preamble_lines
+
+
 def prepare_js_json(paper_dict):
     preamble = paper_dict['preamble']
     preamble_lines = clean_preamble(preamble)
     paper_dict["preamble"] = preamble_lines
-    paper_dict["preamble"] = paper_dict["preamble"].replace("\\newcommand*", "\\newcommand") # TODO: why?
+    paper_dict["preamble"] = paper_dict["preamble"].replace("\\newcommand*", "\\newcommand")  # TODO: why?
     for sec in paper_dict["sections"]:
         for eq in sec["equations"]:
             eq['latex'] = substitute_from_dict(eq["latex"], LATEX_SUBS)
-            if '&' in eq or r'\n' in repr(eq):
+            stripped = eq['latex'].strip(' ')
+
+            has_line_break = ('&' in stripped and '&gt' not in stripped and '&lt' not in stripped) or r'\\' in stripped
+            has_align_start = r'\begin{align' in stripped[:20]
+            has_align_end = r'\end{align' in stripped[-20:]
+
+            # there are several aligned envs like aligned, align and align*, the might be surrounded by \left, \right,
+            # \tag, whitespaces or dots
+
+            if has_line_break and not (has_align_start and has_align_end):
                 eq["latex"] = r"\begin{aligned}" + eq['latex'] + r"\end{aligned}"
-            # eq['latex'] = r"\begin{aligned}" + substitute_from_dict(eq["latex"], LATEX_SUBS) + r"\end{aligned}"
+
     return paper_dict
 
 
@@ -117,20 +133,14 @@ def call_js(paper_dict, paper_id=""):
             if "Error in LaTeX:KaTeX parse error" in result.stderr:
                 logging.debug("Compilation failed: {}".format(result.stderr))
             else:
-                logging.warning("Unexpected error in tex2mathml.js (Arxiv ID: {}):".format(paper_dict["arxiv_id"]) + result.stderr)
+                logging.warning(
+                    "Unexpected error in tex2mathml.js (Arxiv ID: {}):".format(paper_dict["arxiv_id"]) + result.stderr)
         result = json.loads(result.stdout)
         result["preamble"] = result["preamble"].split("\n")
         return result
     except subprocess.TimeoutExpired:
         logging.warning("Timeout for paper {}: \n".format(paper_id) + "\n")
         return False
-
-
-def clean_preamble(preamble):
-    preamble = [substitute_from_dict(preamble_entry, PREAMBLE_SUBS) for preamble_entry in preamble]
-    full_preamble = PREAMBLE_HOTFIX + preamble
-    preamble_lines = "\n".join(full_preamble)
-    return preamble_lines
 
 
 def compile_paper(paper_dict, paper_id="<string>"):
@@ -145,7 +155,7 @@ def compile_string(latex):
     """Use the same compilation pipeline to compile a string"""
     paper_dict = {
         "preamble": [],
-        "sections" : [{"equations": [{"latex": latex, "no": 0}]}]
+        "sections": [{"equations": [{"latex": latex, "no": 0}]}]
     }
     paper_dict = compile_paper(paper_dict)
     print(paper_dict)
@@ -155,10 +165,10 @@ def compile_string(latex):
     return None
 
 
-if __name__ == "__main__":
-    FILE_PATH = "/mathml/1703.08475.json"
-    PAPER_ID = os.path.basename(FILE_PATH).replace(".json", "")
-    with open(FILE_PATH, 'r') as f:
-        P = json.load(f)
-        print(compile_paper(P, PAPER_ID))
-    print(compile_string("f(x) = x^2"))
+# if __name__ == "__main__":
+#     FILE_PATH = "/mathml/1703.08475.json"
+#     PAPER_ID = os.path.basename(FILE_PATH).replace(".json", "")
+#     with open(FILE_PATH, 'r') as f:
+#         P = json.load(f)
+#         print(compile_paper(P, PAPER_ID))
+#     print(compile_string("f(x) = x^2"))
