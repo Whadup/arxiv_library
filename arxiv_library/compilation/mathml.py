@@ -89,9 +89,18 @@ def prepare_js_json(paper_dict):
     for sec in paper_dict["sections"]:
         for eq in sec["equations"]:
             eq['latex'] = substitute_from_dict(eq["latex"], LATEX_SUBS)
-            if '&' in eq or r'\n' in repr(eq):
+            stripped = eq['latex'].strip(' ')
+
+            has_line_break = ('&' in stripped and '&gt' not in stripped and '&lt' not in stripped) or r'\\' in stripped
+            has_align_start = r'\begin{align' in stripped[:20]
+            has_align_end = r'\end{align' in stripped[-20:]
+
+            # there are several aligned envs like aligned, align and align*, the might be surrounded by \left, \right,
+            # \tag, whitespaces or dots
+
+            if has_line_break and not (has_align_start and has_align_end):
                 eq["latex"] = r"\begin{aligned}" + eq['latex'] + r"\end{aligned}"
-            # eq['latex'] = r"\begin{aligned}" + substitute_from_dict(eq["latex"], LATEX_SUBS) + r"\end{aligned}"
+
     return paper_dict
 
 
